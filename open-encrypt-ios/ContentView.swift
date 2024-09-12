@@ -93,15 +93,19 @@ func send_http_request(username: String, password: String){
             return
         }
         
+        print(data)
+        
         //define the shape and type of the JSON response
         struct LoginResponse: Codable {
             let status: String
+            let error: String
         }
         
         let decoder = JSONDecoder()
         do {
             let response = try decoder.decode(LoginResponse.self, from: data)
-            print("Status:", response.status)
+            print("Status: ", response.status)
+            print("Error: ", response.error)
         } catch {
             print("Error decoding JSON:", error)
         }
