@@ -14,55 +14,48 @@ struct ContentView: View {
     @State private var loginSuccessful: Bool = false
     
     var body: some View {
-        VStack {
-            
-            Text("Welcome to Open Encrypt")
-            
-            // TextField for username input
-            TextField("Enter username", text: $username)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-                .autocapitalization(.none)
-            
-            // SecureField for password input
-            SecureField("Enter password", text: $password)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-            
-            Button("Login") {
-                // Call the async function with completion handler
-                send_http_request(username: username, password: password) { success in
-                    // Update the state on the main thread
-                    DispatchQueue.main.async {
-                        loginSuccessful = success
+        NavigationStack {
+            VStack {
+                
+                Text("Welcome to Open Encrypt")
+                
+                // TextField for username input
+                TextField("Enter username", text: $username)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                    .autocapitalization(.none)
+                
+                // SecureField for password input
+                SecureField("Enter password", text: $password)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                
+                Button("Login") {
+                    // Call the async function with completion handler
+                    send_http_request(username: username, password: password) { success in
+                        // Update the state on the main thread
+                        DispatchQueue.main.async {
+                            loginSuccessful = success
+                        }
                     }
                 }
+                
+                Text(loginSuccessful ? "Login was successful!" : "Please log in.")
+                
+                // Navigate to the SuccessView based on the state
+                    .navigationDestination(isPresented: $loginSuccessful) {
+                        SuccessView()
+                    }
             }
-
-            if loginSuccessful {
-                Text("Login was successful!")
-            } else {
-                Text("Please log in.")
-            }
-            
-            // Navigation destination for successful login
-            NavigationLink(value: "SuccessView") {
-                EmptyView()
-            }
-            .navigationDestination(for: String.self) { value in
-                if value == "SuccessView" {
-                    SuccessView()
-                }
-            }
+            .padding()
         }
-        .padding()
     }
 }
 
 struct SuccessView: View {
     var body: some View {
-        Text("Login Successful! Welcome to the new view.")
-            .padding()
+        Text("You are now logged in!")
+            .font(.largeTitle)
     }
 }
 
