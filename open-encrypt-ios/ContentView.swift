@@ -11,7 +11,6 @@ import Foundation
 struct ContentView: View {
     @State private var username: String = ""
     @State private var password: String = ""
-    @State private var button_clicked: Bool = false
     @State private var loginSuccessful: Bool = false
     
     var body: some View {
@@ -30,12 +29,20 @@ struct ContentView: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
             
-            Button("Sign In", action: {
-                send_http_request(username: username,password: password)
-                button_clicked = true
-            })
-            if button_clicked {
-                Text("Sending login request ...")
+            Button("Login") {
+                // Call the async function with completion handler
+                send_http_request(username: username, password: password) { success in
+                    // Update the state on the main thread
+                    DispatchQueue.main.async {
+                        loginSuccessful = success
+                    }
+                }
+            }
+
+            if loginSuccessful {
+                Text("Login was successful!")
+            } else {
+                Text("Please log in.")
             }
             
             // Navigation destination for successful login
@@ -59,9 +66,8 @@ struct SuccessView: View {
     }
 }
 
-//function send HTTP post request
-func send_http_request(username: String, password: String){
-
+// Define the function with a completion handler
+func send_http_request(username: String, password: String, completion: @escaping (Bool) -> Void) {
     // Define the URL of the endpoint
     guard let url = URL(string: "https://open-encrypt.com/login_ios.php") else {
         fatalError("Invalid URL")
@@ -75,7 +81,7 @@ func send_http_request(username: String, password: String){
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
     // Create JSON data
-    let json: [String: Any] = ["username": username,"password": password]
+    let json: [String: Any] = ["username": username, "password": password]
     let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
     // Set HTTP body
@@ -85,31 +91,36 @@ func send_http_request(username: String, password: String){
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
             print("Error: \(error.localizedDescription)")
+            completion(false)
             return
         }
         
         guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             print("Error: Invalid response or no data")
+            completion(false)
             return
         }
         
-        print(data)
-        
-        //define the shape and type of the JSON response
+        // Define the shape and type of the JSON response
         struct LoginResponse: Codable {
             let status: String
-            let error: String
+            let error: String?
         }
         
         let decoder = JSONDecoder()
         do {
-            let response = try decoder.decode(LoginResponse.self, from: data)
-            print("Status: ", response.status)
-            print("Error: ", response.error)
+            let decodedResponse = try decoder.decode(LoginResponse.self, from: data)
+            print("Status: ", decodedResponse.status)
+            print("Error: ", decodedResponse.error ?? "No error")
+            if decodedResponse.status == "success" {
+                completion(true)
+            } else {
+                completion(false)
+            }
         } catch {
             print("Error decoding JSON:", error)
+            completion(false)
         }
-        
     }
 
     // Start the task
