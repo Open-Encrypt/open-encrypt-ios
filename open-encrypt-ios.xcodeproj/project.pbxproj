@@ -1,0 +1,587 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D08459A32C926812000D5D03 /* open_encrypt_iosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08459A22C926812000D5D03 /* open_encrypt_iosApp.swift */; };
+		D08459A52C926812000D5D03 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08459A42C926812000D5D03 /* ContentView.swift */; };
+		D08459A72C926813000D5D03 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D08459A62C926813000D5D03 /* Assets.xcassets */; };
+		D08459AA2C926813000D5D03 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D08459A92C926813000D5D03 /* Preview Assets.xcassets */; };
+		D08459B42C926814000D5D03 /* open_encrypt_iosTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08459B32C926814000D5D03 /* open_encrypt_iosTests.swift */; };
+		D08459BE2C926814000D5D03 /* open_encrypt_iosUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08459BD2C926814000D5D03 /* open_encrypt_iosUITests.swift */; };
+		D08459C02C926814000D5D03 /* open_encrypt_iosUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08459BF2C926814000D5D03 /* open_encrypt_iosUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D08459B02C926814000D5D03 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D08459972C926812000D5D03 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D084599E2C926812000D5D03;
+			remoteInfo = "open-encrypt-ios";
+		};
+		D08459BA2C926814000D5D03 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D08459972C926812000D5D03 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D084599E2C926812000D5D03;
+			remoteInfo = "open-encrypt-ios";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		D084599F2C926812000D5D03 /* open-encrypt-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "open-encrypt-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D08459A22C926812000D5D03 /* open_encrypt_iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = open_encrypt_iosApp.swift; sourceTree = "<group>"; };
+		D08459A42C926812000D5D03 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D08459A62C926813000D5D03 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D08459A92C926813000D5D03 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		D08459AF2C926814000D5D03 /* open-encrypt-iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "open-encrypt-iosTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D08459B32C926814000D5D03 /* open_encrypt_iosTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = open_encrypt_iosTests.swift; sourceTree = "<group>"; };
+		D08459B92C926814000D5D03 /* open-encrypt-iosUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "open-encrypt-iosUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D08459BD2C926814000D5D03 /* open_encrypt_iosUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = open_encrypt_iosUITests.swift; sourceTree = "<group>"; };
+		D08459BF2C926814000D5D03 /* open_encrypt_iosUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = open_encrypt_iosUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D084599C2C926812000D5D03 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D08459AC2C926814000D5D03 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D08459B62C926814000D5D03 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D08459962C926812000D5D03 = {
+			isa = PBXGroup;
+			children = (
+				D08459A12C926812000D5D03 /* open-encrypt-ios */,
+				D08459B22C926814000D5D03 /* open-encrypt-iosTests */,
+				D08459BC2C926814000D5D03 /* open-encrypt-iosUITests */,
+				D08459A02C926812000D5D03 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D08459A02C926812000D5D03 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D084599F2C926812000D5D03 /* open-encrypt-ios.app */,
+				D08459AF2C926814000D5D03 /* open-encrypt-iosTests.xctest */,
+				D08459B92C926814000D5D03 /* open-encrypt-iosUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D08459A12C926812000D5D03 /* open-encrypt-ios */ = {
+			isa = PBXGroup;
+			children = (
+				D08459A22C926812000D5D03 /* open_encrypt_iosApp.swift */,
+				D08459A42C926812000D5D03 /* ContentView.swift */,
+				D08459A62C926813000D5D03 /* Assets.xcassets */,
+				D08459A82C926813000D5D03 /* Preview Content */,
+			);
+			path = "open-encrypt-ios";
+			sourceTree = "<group>";
+		};
+		D08459A82C926813000D5D03 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				D08459A92C926813000D5D03 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		D08459B22C926814000D5D03 /* open-encrypt-iosTests */ = {
+			isa = PBXGroup;
+			children = (
+				D08459B32C926814000D5D03 /* open_encrypt_iosTests.swift */,
+			);
+			path = "open-encrypt-iosTests";
+			sourceTree = "<group>";
+		};
+		D08459BC2C926814000D5D03 /* open-encrypt-iosUITests */ = {
+			isa = PBXGroup;
+			children = (
+				D08459BD2C926814000D5D03 /* open_encrypt_iosUITests.swift */,
+				D08459BF2C926814000D5D03 /* open_encrypt_iosUITestsLaunchTests.swift */,
+			);
+			path = "open-encrypt-iosUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D084599E2C926812000D5D03 /* open-encrypt-ios */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D08459C32C926814000D5D03 /* Build configuration list for PBXNativeTarget "open-encrypt-ios" */;
+			buildPhases = (
+				D084599B2C926812000D5D03 /* Sources */,
+				D084599C2C926812000D5D03 /* Frameworks */,
+				D084599D2C926812000D5D03 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "open-encrypt-ios";
+			productName = "open-encrypt-ios";
+			productReference = D084599F2C926812000D5D03 /* open-encrypt-ios.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D08459AE2C926814000D5D03 /* open-encrypt-iosTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D08459C62C926814000D5D03 /* Build configuration list for PBXNativeTarget "open-encrypt-iosTests" */;
+			buildPhases = (
+				D08459AB2C926814000D5D03 /* Sources */,
+				D08459AC2C926814000D5D03 /* Frameworks */,
+				D08459AD2C926814000D5D03 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D08459B12C926814000D5D03 /* PBXTargetDependency */,
+			);
+			name = "open-encrypt-iosTests";
+			productName = "open-encrypt-iosTests";
+			productReference = D08459AF2C926814000D5D03 /* open-encrypt-iosTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D08459B82C926814000D5D03 /* open-encrypt-iosUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D08459C92C926814000D5D03 /* Build configuration list for PBXNativeTarget "open-encrypt-iosUITests" */;
+			buildPhases = (
+				D08459B52C926814000D5D03 /* Sources */,
+				D08459B62C926814000D5D03 /* Frameworks */,
+				D08459B72C926814000D5D03 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D08459BB2C926814000D5D03 /* PBXTargetDependency */,
+			);
+			name = "open-encrypt-iosUITests";
+			productName = "open-encrypt-iosUITests";
+			productReference = D08459B92C926814000D5D03 /* open-encrypt-iosUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D08459972C926812000D5D03 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					D084599E2C926812000D5D03 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					D08459AE2C926814000D5D03 = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = D084599E2C926812000D5D03;
+					};
+					D08459B82C926814000D5D03 = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = D084599E2C926812000D5D03;
+					};
+				};
+			};
+			buildConfigurationList = D084599A2C926812000D5D03 /* Build configuration list for PBXProject "open-encrypt-ios" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D08459962C926812000D5D03;
+			productRefGroup = D08459A02C926812000D5D03 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D084599E2C926812000D5D03 /* open-encrypt-ios */,
+				D08459AE2C926814000D5D03 /* open-encrypt-iosTests */,
+				D08459B82C926814000D5D03 /* open-encrypt-iosUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D084599D2C926812000D5D03 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D08459AA2C926813000D5D03 /* Preview Assets.xcassets in Resources */,
+				D08459A72C926813000D5D03 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D08459AD2C926814000D5D03 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D08459B72C926814000D5D03 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D084599B2C926812000D5D03 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D08459A52C926812000D5D03 /* ContentView.swift in Sources */,
+				D08459A32C926812000D5D03 /* open_encrypt_iosApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D08459AB2C926814000D5D03 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D08459B42C926814000D5D03 /* open_encrypt_iosTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D08459B52C926814000D5D03 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D08459C02C926814000D5D03 /* open_encrypt_iosUITestsLaunchTests.swift in Sources */,
+				D08459BE2C926814000D5D03 /* open_encrypt_iosUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D08459B12C926814000D5D03 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D084599E2C926812000D5D03 /* open-encrypt-ios */;
+			targetProxy = D08459B02C926814000D5D03 /* PBXContainerItemProxy */;
+		};
+		D08459BB2C926814000D5D03 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D084599E2C926812000D5D03 /* open-encrypt-ios */;
+			targetProxy = D08459BA2C926814000D5D03 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		D08459C12C926814000D5D03 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D08459C22C926814000D5D03 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D08459C42C926814000D5D03 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"open-encrypt-ios/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "jackson-walters-llc.open-encrypt-ios";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D08459C52C926814000D5D03 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"open-encrypt-ios/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "jackson-walters-llc.open-encrypt-ios";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D08459C72C926814000D5D03 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "jackson-walters-llc.open-encrypt-iosTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/open-encrypt-ios.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/open-encrypt-ios";
+			};
+			name = Debug;
+		};
+		D08459C82C926814000D5D03 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "jackson-walters-llc.open-encrypt-iosTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/open-encrypt-ios.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/open-encrypt-ios";
+			};
+			name = Release;
+		};
+		D08459CA2C926814000D5D03 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "jackson-walters-llc.open-encrypt-iosUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "open-encrypt-ios";
+			};
+			name = Debug;
+		};
+		D08459CB2C926814000D5D03 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "jackson-walters-llc.open-encrypt-iosUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "open-encrypt-ios";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D084599A2C926812000D5D03 /* Build configuration list for PBXProject "open-encrypt-ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D08459C12C926814000D5D03 /* Debug */,
+				D08459C22C926814000D5D03 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D08459C32C926814000D5D03 /* Build configuration list for PBXNativeTarget "open-encrypt-ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D08459C42C926814000D5D03 /* Debug */,
+				D08459C52C926814000D5D03 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D08459C62C926814000D5D03 /* Build configuration list for PBXNativeTarget "open-encrypt-iosTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D08459C72C926814000D5D03 /* Debug */,
+				D08459C82C926814000D5D03 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D08459C92C926814000D5D03 /* Build configuration list for PBXNativeTarget "open-encrypt-iosUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D08459CA2C926814000D5D03 /* Debug */,
+				D08459CB2C926814000D5D03 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D08459972C926812000D5D03 /* Project object */;
+}
