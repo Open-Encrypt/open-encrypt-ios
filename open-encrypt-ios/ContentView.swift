@@ -8,24 +8,22 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State var button_clicked: Bool = false
     var body: some View {
         VStack {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
             Text("Welcome to Open Encrypt")
-            Button(action: signIn) {
-                Text("Sign In")
+            Button("Sign In", action: {
+                button_clicked = !button_clicked
+            })
+            if button_clicked {
+                Text("Button clicked!")
             }
-
-
         }
         .padding()
     }
-    func signIn(){
-        print("button clicked")
-    }
-
 }
 
 #Preview {
