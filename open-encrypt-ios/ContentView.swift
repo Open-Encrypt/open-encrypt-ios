@@ -12,15 +12,18 @@ struct ContentView: View {
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var button_clicked: Bool = false
+    @State private var loginSuccessful: Bool = false
+    
     var body: some View {
         VStack {
             
             Text("Welcome to Open Encrypt")
             
-            // TextField for user input
+            // TextField for username input
             TextField("Enter username", text: $username)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
+                .autocapitalization(.none)
             
             // SecureField for password input
             SecureField("Enter password", text: $password)
@@ -34,8 +37,25 @@ struct ContentView: View {
             if button_clicked {
                 Text("Sending login request ...")
             }
+            
+            // Navigation destination for successful login
+            NavigationLink(value: "SuccessView") {
+                EmptyView()
+            }
+            .navigationDestination(for: String.self) { value in
+                if value == "SuccessView" {
+                    SuccessView()
+                }
+            }
         }
         .padding()
+    }
+}
+
+struct SuccessView: View {
+    var body: some View {
+        Text("Login Successful! Welcome to the new view.")
+            .padding()
     }
 }
 
@@ -61,7 +81,6 @@ func send_http_request(username: String, password: String){
     // Set HTTP body
     request.httpBody = jsonData
     
-
     // Create a URLSession data task
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
@@ -74,8 +93,19 @@ func send_http_request(username: String, password: String){
             return
         }
         
-        // Handle the response data if needed
-        print("Success: \(String(data: data, encoding: .utf8) ?? "No data")")
+        //define the shape and type of the JSON response
+        struct LoginResponse: Codable {
+            let status: String
+        }
+        
+        let decoder = JSONDecoder()
+        do {
+            let response = try decoder.decode(LoginResponse.self, from: data)
+            print("Status:", response.status)
+        } catch {
+            print("Error decoding JSON:", error)
+        }
+        
     }
 
     // Start the task
