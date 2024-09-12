@@ -39,10 +39,17 @@ func send_http_request(){
     // Create the URLRequest object
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
+    
+    // Set the content type for JSON
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-    // Set POST body
-    let postString = "username=jackson" // Replace with your actual value
-    request.httpBody = postString.data(using: .utf8)
+    // Create JSON data
+    let json: [String: Any] = ["username": "jackson"]
+    let jsonData = try? JSONSerialization.data(withJSONObject: json)
+
+    // Set HTTP body
+    request.httpBody = jsonData
+    
 
     // Create a URLSession data task
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
@@ -55,7 +62,6 @@ func send_http_request(){
             print("Error: Invalid response or no data")
             return
         }
-        
         
         // Handle the response data if needed
         print("Success: \(String(data: data, encoding: .utf8) ?? "No data")")
