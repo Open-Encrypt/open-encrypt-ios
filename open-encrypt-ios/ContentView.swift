@@ -9,19 +9,30 @@ import SwiftUI
 import Foundation
 
 struct ContentView: View {
-    @State var button_clicked: Bool = false
+    @State private var username: String = ""
+    @State private var password: String = ""
+    @State private var button_clicked: Bool = false
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
+            
             Text("Welcome to Open Encrypt")
+            
+            // TextField for user input
+            TextField("Enter username", text: $username)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            
+            // SecureField for password input
+            SecureField("Enter password", text: $password)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            
             Button("Sign In", action: {
-                send_http_request()
-                button_clicked = !button_clicked
+                send_http_request(username: username,password: password)
+                button_clicked = true
             })
             if button_clicked {
-                Text("Button clicked!")
+                Text("Sending login request ...")
             }
         }
         .padding()
@@ -29,7 +40,7 @@ struct ContentView: View {
 }
 
 //function send HTTP post request
-func send_http_request(){
+func send_http_request(username: String, password: String){
 
     // Define the URL of the endpoint
     guard let url = URL(string: "https://open-encrypt.com/login_ios.php") else {
@@ -44,7 +55,7 @@ func send_http_request(){
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
     // Create JSON data
-    let json: [String: Any] = ["username": "jackson"]
+    let json: [String: Any] = ["username": username,"password": password]
     let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
     // Set HTTP body
