@@ -56,7 +56,7 @@ struct ContentView: View {
 }
 
 func checkToken() -> Bool {
-    if let token = UserDefaults.standard.string(forKey: "userToken") {
+    if let token = UserDefaults.standard.string(forKey: "token") {
         // Optionally, send token to server to verify its validity
         print("Token found: \(token)")
         // For simplicity, assume token is valid if it exists
@@ -118,7 +118,7 @@ func validLogin(username: String, password: String, completion: @escaping (Bool,
             
             // Save token if available
             if let token = decodedResponse.token {
-                UserDefaults.standard.set(token, forKey: "userToken")
+                UserDefaults.standard.set(token, forKey: "token")
                 UserDefaults.standard.set(username, forKey: "username")
             }
             

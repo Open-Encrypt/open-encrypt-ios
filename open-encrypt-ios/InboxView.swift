@@ -50,11 +50,14 @@ func getMessages(completion: @escaping (Bool, String?) -> Void) {
     
     // Declare username as an optional
     var username: String?
+    var token: String?
 
     if checkToken() {
         // retrieve the username from UserDefaults
         username = UserDefaults.standard.string(forKey: "username")
-        print("Username is: \(username!)")
+        token = UserDefaults.standard.string(forKey: "token")
+        print("Username from UserDefaults: \(username!)")
+        print("Token from UserDefaults: \(token!)")
     }
     else{
         print("Invalid or no token.")
@@ -75,7 +78,7 @@ func getMessages(completion: @escaping (Bool, String?) -> Void) {
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
     // Create JSON data
-    let json: [String: Any] = ["username": username!]
+    let json: [String: Any] = ["username": username!, "token": token!]
     let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
     // Set HTTP body
@@ -109,10 +112,11 @@ func getMessages(completion: @escaping (Bool, String?) -> Void) {
             let decodedResponse = try decoder.decode(MessagesResponse.self, from: data)
             print("Status: ", decodedResponse.status)
             print("Error: ", decodedResponse.error ?? "No error")
-            print("From:",decodedResponse.from)
-            print("To:",decodedResponse.to)
-            print("Messages:",decodedResponse.messages)
             
+            //print the first message
+            print("From:",decodedResponse.from.prefix(1))
+            print("To:",decodedResponse.to.prefix(1))
+            print("Messages:",decodedResponse.messages.prefix(1))
             
             // Determine success
             let success = decodedResponse.status == "success"
