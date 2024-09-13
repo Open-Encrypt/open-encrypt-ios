@@ -9,6 +9,7 @@ import SwiftUI
 
 struct InboxView: View {
     @State private var logout: Bool = false
+    @State private var secretKey: String = ""
     @State private var getMessagesStatus: Bool = false
     @State private var getMessagesErrorMessage: String? = ""
     @State private var messageList: [(from: String,to: String,message: String)] = []
@@ -17,7 +18,7 @@ struct InboxView: View {
     var body: some View {
         NavigationStack {
             VStack{
-                Text("You are now logged in!")
+                Text("Inbox")
                     .font(.largeTitle)
                     .navigationBarBackButtonHidden(true)
                     .padding()
@@ -32,7 +33,7 @@ struct InboxView: View {
                 }
                 
                 Button("Get Messages"){
-                    getMessages(){ success, error, messages in
+                    getMessages(secretKey: secretKey){ success, error, messages in
                         // Update the state on the main thread
                         DispatchQueue.main.async {
                             getMessagesStatus = success
@@ -42,6 +43,12 @@ struct InboxView: View {
                         }
                     }
                 }
+                
+                // TextField for username input
+                TextField("Secret key:", text: $secretKey)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                    .autocapitalization(.none)
                 
                 processMessages(messages: messageList)
                 
@@ -67,7 +74,7 @@ func processMessages(messages: [(from: String, to: String, message: String)]) ->
 
 
 // Define the function with a completion handler
-func getMessages(completion: @escaping (Bool, String?, [(String,String,String)]) -> Void) {
+func getMessages(secretKey: String, completion: @escaping (Bool, String?, [(String,String,String)]) -> Void) {
     
     // Declare username as an optional
     var username: String?
