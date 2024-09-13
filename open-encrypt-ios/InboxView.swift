@@ -59,13 +59,13 @@ struct InboxView: View {
 
 // Define the function with named tuple elements
 func processMessages(messages: [(from: String, to: String, message: String)]) -> some View {
-    List(messages, id: \.from) { message in
+    List(messages, id: \.message) { messageData in
         VStack(alignment: .leading) {
-            Text("From: \(message.from)")
+            Text("From: \(messageData.from)")
                 .font(.headline)
-            Text("To: \(message.to)")
+            Text("To: \(messageData.to)")
                 .font(.subheadline)
-            Text(message.message)
+            Text(messageData.message)
                 .font(.body)
         }
         .padding()
@@ -106,7 +106,7 @@ func getMessages(secretKey: String, completion: @escaping (Bool, String?, [(Stri
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
     // Create JSON data
-    let json: [String: Any] = ["username": username!, "token": token!]
+    let json: [String: Any] = ["username": username!, "token": token!, "secret_key": secretKey]
     let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
     // Set HTTP body
@@ -142,9 +142,9 @@ func getMessages(secretKey: String, completion: @escaping (Bool, String?, [(Stri
             print("Error: ", decodedResponse.error ?? "No error")
             
             //print the first message
-            print("From:",decodedResponse.from.prefix(1))
-            print("To:",decodedResponse.to.prefix(1))
-            print("Messages:",decodedResponse.messages.prefix(1))
+            print("From:",decodedResponse.from)
+            print("To:",decodedResponse.to)
+            print("Messages:",decodedResponse.messages[2])
             
             // zip three lists of from, to, message into a single list
             var messages: [(from: String, to: String, message: String)] = []
