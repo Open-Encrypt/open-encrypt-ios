@@ -10,6 +10,8 @@
 		D0492CC62C93D679009F15C3 /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0492CC52C93D679009F15C3 /* InboxView.swift */; };
 		D0492CC72C93D679009F15C3 /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0492CC52C93D679009F15C3 /* InboxView.swift */; };
 		D0492CC82C93D679009F15C3 /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0492CC52C93D679009F15C3 /* InboxView.swift */; };
+		D0492CC92C93F850009F15C3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08459A42C926812000D5D03 /* ContentView.swift */; };
+		D0492CCA2C93F851009F15C3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08459A42C926812000D5D03 /* ContentView.swift */; };
 		D08459A32C926812000D5D03 /* open_encrypt_iosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08459A22C926812000D5D03 /* open_encrypt_iosApp.swift */; };
 		D08459A52C926812000D5D03 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08459A42C926812000D5D03 /* ContentView.swift */; };
 		D08459A72C926813000D5D03 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D08459A62C926813000D5D03 /* Assets.xcassets */; };
@@ -274,6 +276,7 @@
 			files = (
 				D08459B42C926814000D5D03 /* open_encrypt_iosTests.swift in Sources */,
 				D0492CC72C93D679009F15C3 /* InboxView.swift in Sources */,
+				D0492CC92C93F850009F15C3 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -283,6 +286,7 @@
 			files = (
 				D08459C02C926814000D5D03 /* open_encrypt_iosUITestsLaunchTests.swift in Sources */,
 				D0492CC82C93D679009F15C3 /* InboxView.swift in Sources */,
+				D0492CCA2C93F851009F15C3 /* ContentView.swift in Sources */,
 				D08459BE2C926814000D5D03 /* open_encrypt_iosUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

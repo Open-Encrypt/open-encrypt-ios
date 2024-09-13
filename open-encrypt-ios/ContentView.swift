@@ -6,12 +6,11 @@
 //
 
 import SwiftUI
-import Foundation
 
 struct ContentView: View {
     @State private var username: String = ""
     @State private var password: String = ""
-    @State private var loginSuccessful: Bool = false
+    @State private var loginSuccessful: Bool = checkToken()
     @State private var loginErrorMessage: String? = ""
     
     var body: some View {
@@ -42,20 +41,29 @@ struct ContentView: View {
                     }
                 }
                 
-                Text(loginSuccessful ? "Login was successful!" : "Please log in.")
-                // Navigate to the SuccessView based on the state
-                    .navigationDestination(isPresented: $loginSuccessful) {
-                        InboxView()
-                    }
-                
                 if let errorMessage = loginErrorMessage {
                     Text(errorMessage)
-                } else {
-                    Text("No errors.")
                 }
             }
             .padding()
+            // Navigate to the SuccessView based on the state
+            .navigationDestination(isPresented: $loginSuccessful) {
+                InboxView()
+            }
+
         }
+    }
+}
+
+func checkToken() -> Bool {
+    if let token = UserDefaults.standard.string(forKey: "userToken") {
+        // Optionally, send token to server to verify its validity
+        print("Token found: \(token)")
+        // For simplicity, assume token is valid if it exists
+        return true
+    } else {
+        print("No token found.")
+        return false
     }
 }
 
@@ -97,7 +105,7 @@ func sendHTTPrequest(username: String, password: String, completion: @escaping (
         // Define the shape and type of the JSON response
         struct LoginResponse: Codable {
             let status: String
-            let token: String? // Adjusted to use `token` for simplicity
+            let token: String?
             let error: String?
         }
         
