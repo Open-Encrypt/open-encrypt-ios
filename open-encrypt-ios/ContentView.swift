@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var loginSuccessful: Bool = false
+    @State private var loginErrorMessage: String? = ""
     
     var body: some View {
         NavigationStack {
@@ -32,35 +33,34 @@ struct ContentView: View {
                 
                 Button("Login") {
                     // Call the async function with completion handler
-                    send_http_request(username: username, password: password) { success in
+                    sendHTTPrequest(username: username, password: password) { success, error in
                         // Update the state on the main thread
                         DispatchQueue.main.async {
                             loginSuccessful = success
+                            loginErrorMessage = error
                         }
                     }
                 }
                 
                 Text(loginSuccessful ? "Login was successful!" : "Please log in.")
-                
                 // Navigate to the SuccessView based on the state
                     .navigationDestination(isPresented: $loginSuccessful) {
-                        SuccessView()
+                        InboxView()
                     }
+                
+                if let errorMessage = loginErrorMessage {
+                    Text(errorMessage)
+                } else {
+                    Text("No errors.")
+                }
             }
             .padding()
         }
     }
 }
 
-struct SuccessView: View {
-    var body: some View {
-        Text("You are now logged in!")
-            .font(.largeTitle)
-    }
-}
-
 // Define the function with a completion handler
-func send_http_request(username: String, password: String, completion: @escaping (Bool) -> Void) {
+func sendHTTPrequest(username: String, password: String, completion: @escaping (Bool, String?) -> Void) {
     // Define the URL of the endpoint
     guard let url = URL(string: "https://open-encrypt.com/login_ios.php") else {
         fatalError("Invalid URL")
@@ -84,19 +84,20 @@ func send_http_request(username: String, password: String, completion: @escaping
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
             print("Error: \(error.localizedDescription)")
-            completion(false)
+            completion(false, nil)
             return
         }
         
         guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             print("Error: Invalid response or no data")
-            completion(false)
+            completion(false, nil)
             return
         }
         
         // Define the shape and type of the JSON response
         struct LoginResponse: Codable {
             let status: String
+            let token: String? // Adjusted to use `token` for simplicity
             let error: String?
         }
         
@@ -104,21 +105,29 @@ func send_http_request(username: String, password: String, completion: @escaping
         do {
             let decodedResponse = try decoder.decode(LoginResponse.self, from: data)
             print("Status: ", decodedResponse.status)
+            print("Token: ", decodedResponse.token ?? "No token")
             print("Error: ", decodedResponse.error ?? "No error")
-            if decodedResponse.status == "success" {
-                completion(true)
-            } else {
-                completion(false)
+            
+            // Save token if available
+            if let token = decodedResponse.token {
+                UserDefaults.standard.set(token, forKey: "userToken")
             }
+            
+            // Determine success
+            let success = decodedResponse.status == "success"
+            completion(success, decodedResponse.error)
         } catch {
             print("Error decoding JSON:", error)
-            completion(false)
+            completion(false, "Error decoding JSON")
         }
     }
 
     // Start the task
     task.resume()
 }
+
+
+
 
 #Preview {
     ContentView()
