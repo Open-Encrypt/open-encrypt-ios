@@ -32,7 +32,7 @@ struct ContentView: View {
                 
                 Button("Login") {
                     // Call the async function with completion handler
-                    sendHTTPrequest(username: username, password: password) { success, error in
+                    validLogin(username: username, password: password) { success, error in
                         // Update the state on the main thread
                         DispatchQueue.main.async {
                             loginSuccessful = success
@@ -68,7 +68,7 @@ func checkToken() -> Bool {
 }
 
 // Define the function with a completion handler
-func sendHTTPrequest(username: String, password: String, completion: @escaping (Bool, String?) -> Void) {
+func validLogin(username: String, password: String, completion: @escaping (Bool, String?) -> Void) {
     // Define the URL of the endpoint
     guard let url = URL(string: "https://open-encrypt.com/login_ios.php") else {
         fatalError("Invalid URL")
@@ -119,14 +119,17 @@ func sendHTTPrequest(username: String, password: String, completion: @escaping (
             // Save token if available
             if let token = decodedResponse.token {
                 UserDefaults.standard.set(token, forKey: "userToken")
+                UserDefaults.standard.set(username, forKey: "username")
             }
             
             // Determine success
             let success = decodedResponse.status == "success"
             completion(success, decodedResponse.error)
+            return
         } catch {
             print("Error decoding JSON:", error)
             completion(false, "Error decoding JSON")
+            return
         }
     }
 
