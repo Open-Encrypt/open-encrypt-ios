@@ -11,6 +11,7 @@ struct InboxView: View {
     @State private var logout: Bool = false
     @State private var getMessagesStatus: Bool = false
     @State private var getMessagesErrorMessage: String? = ""
+    @State private var messageList: [(from: String,to: String,message: String)] = []
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -31,22 +32,42 @@ struct InboxView: View {
                 }
                 
                 Button("Get Messages"){
-                    getMessages(){ success, error in
+                    getMessages(){ success, error, messages in
                         // Update the state on the main thread
                         DispatchQueue.main.async {
                             getMessagesStatus = success
                             getMessagesErrorMessage = error
+                            messageList = messages
+                            print(messageList[0].from)
                         }
                     }
                 }
+                
+                processMessages(messages: messageList)
                 
             }
         }
     }
 }
 
+// Define the function with named tuple elements
+func processMessages(messages: [(from: String, to: String, message: String)]) -> some View {
+    List(messages, id: \.from) { message in
+        VStack(alignment: .leading) {
+            Text("From: \(message.from)")
+                .font(.headline)
+            Text("To: \(message.to)")
+                .font(.subheadline)
+            Text(message.message)
+                .font(.body)
+        }
+        .padding()
+    }
+}
+
+
 // Define the function with a completion handler
-func getMessages(completion: @escaping (Bool, String?) -> Void) {
+func getMessages(completion: @escaping (Bool, String?, [(String,String,String)]) -> Void) {
     
     // Declare username as an optional
     var username: String?
@@ -61,7 +82,7 @@ func getMessages(completion: @escaping (Bool, String?) -> Void) {
     }
     else{
         print("Invalid or no token.")
-        completion(false,"Invalid or no token.")
+        completion(false,"Invalid or no token.", [])
         return
     }
     
@@ -88,13 +109,13 @@ func getMessages(completion: @escaping (Bool, String?) -> Void) {
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
             print("Error: \(error.localizedDescription)")
-            completion(false, nil)
+            completion(false, nil, [])
             return
         }
         
         guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             print("Error: Invalid response or no data")
-            completion(false, nil)
+            completion(false, nil, [])
             return
         }
         
@@ -118,12 +139,19 @@ func getMessages(completion: @escaping (Bool, String?) -> Void) {
             print("To:",decodedResponse.to.prefix(1))
             print("Messages:",decodedResponse.messages.prefix(1))
             
+            // zip three lists of from, to, message into a single list
+            var messages: [(from: String, to: String, message: String)] = []
+            let numMessages = decodedResponse.messages.count
+            for i in 0...numMessages-1 {
+                messages.append((from: decodedResponse.from[i], to: decodedResponse.to[i], message: decodedResponse.messages[i]))
+            }
+            
             // Determine success
             let success = decodedResponse.status == "success"
-            completion(success, decodedResponse.error)
+            completion(success, decodedResponse.error,messages)
         } catch {
             print("Error decoding JSON:", error)
-            completion(false, "Error decoding JSON")
+            completion(false, "Error decoding JSON",[])
         }
     }
 
