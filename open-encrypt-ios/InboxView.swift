@@ -59,6 +59,7 @@ func getMessages(completion: @escaping (Bool, String?) -> Void) {
     else{
         print("Invalid or no token.")
         completion(false,"Invalid or no token.")
+        return
     }
     
     // Define the URL of the endpoint
@@ -95,16 +96,22 @@ func getMessages(completion: @escaping (Bool, String?) -> Void) {
         }
         
         // Define the shape and type of the JSON response
-        struct LoginResponse: Codable {
+        struct MessagesResponse: Codable {
             let status: String
             let error: String?
+            let from: [String]
+            let to: [String]
+            let messages: [String]
         }
         
         let decoder = JSONDecoder()
         do {
-            let decodedResponse = try decoder.decode(LoginResponse.self, from: data)
+            let decodedResponse = try decoder.decode(MessagesResponse.self, from: data)
             print("Status: ", decodedResponse.status)
             print("Error: ", decodedResponse.error ?? "No error")
+            print("From:",decodedResponse.from)
+            print("To:",decodedResponse.to)
+            print("Messages:",decodedResponse.messages)
             
             
             // Determine success
