@@ -50,11 +50,29 @@ struct KeysView: View {
                 }
             }
             
-            // TextField for username input
-            TextField("Secret key:", text: $secretKey)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-                .autocapitalization(.none)
+            Button("View Secret Key"){
+                let account = "com.open-encrypt-ios.user.secretKey" // A unique identifier for the key
+                
+                if let retrievedKey = retrieveKey(account: account) {
+                    secretKey = String(data: retrievedKey, encoding: .utf8) ?? ""
+                    print("Retrieved secret key: \(secretKey)")
+                } else {
+                    print("Failed to retrieve secret key")
+                }
+
+            }
+            
+            Button("Generate Keys"){
+                generateKeys(){ success, error, public_key, secret_key in
+                    // Update the state on the main thread
+                    DispatchQueue.main.async {
+                        getPublicKeyStatus = success
+                        getPublicKeyErrorMessage = error
+                        publicKey = public_key
+                        secretKey = secret_key
+                    }
+                }
+            }
             
             Button("Save Secret Key"){
                 let secretKey = secretKey.data(using: .utf8)!  // Example key as Data
@@ -70,28 +88,11 @@ struct KeysView: View {
 
             }
             
-            Button("View Secret Key"){
-                let account = "com.open-encrypt-ios.user.secretKey" // A unique identifier for the key
-                
-                if let retrievedKey = retrieveKey(account: account) {
-                    let keyString = String(data: retrievedKey, encoding: .utf8)
-                    print("Retrieved secret key: \(keyString ?? "Invalid Key")")
-                } else {
-                    print("Failed to retrieve secret key")
-                }
-
-            }
-            
-            Button("Generate Keys"){
-                generateKeys(){ success, error, public_key, secret_key in
-                    // Update the state on the main thread
-                    DispatchQueue.main.async {
-                        getPublicKeyStatus = success
-                        getPublicKeyErrorMessage = error
-                        //publicKey = public_key
-                    }
-                }
-            }
+            // TextField for username input
+            TextField("Secret key:", text: $secretKey)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .autocapitalization(.none)
             
             // Display the retrieved public key
             if !publicKey.isEmpty {
