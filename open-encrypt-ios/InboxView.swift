@@ -19,7 +19,7 @@ struct InboxView: View {
             
             ViewPublicKeysView()
                 .tabItem {
-                    Label("Public Keys", systemImage: "key.fill")
+                    Label("Keys", systemImage: "key.fill")
                 }
         }
     }
