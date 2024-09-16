@@ -28,16 +28,38 @@ struct InboxView: View {
 
 
 struct ViewPublicKeysView: View {
+    @State private var getPublicKeyStatus: Bool = false
+    @State private var getPublicKeyErrorMessage: String? = ""
+    @State private var publicKey: String = ""
+    
     var body: some View {
         VStack {
             Text("Stored Public Keys")
                 .font(.headline)
                 .padding()
             
-            // Display stored public keys
-            List {
-                Text("Public Key 1")
-                Text("Public Key 2")
+            Button("View Public Key"){
+                getPublicKey(){ success, error, public_key in
+                    // Update the state on the main thread
+                    DispatchQueue.main.async {
+                        getPublicKeyStatus = success
+                        getPublicKeyErrorMessage = error
+                        publicKey = public_key
+                    }
+                }
+            }
+            
+            // Display the retrieved public key
+            if !publicKey.isEmpty {
+                Text("Public Key:")
+                    .font(.subheadline)
+                    .padding(.top)
+                Text(publicKey)
+                    .padding()
+            } else if let error = getPublicKeyErrorMessage {
+                Text("Error: \(error)")
+                    .foregroundColor(.red)
+                    .padding()
             }
         }
     }
@@ -272,7 +294,7 @@ func getPublicKey(completion: @escaping (Bool, String?, String) -> Void) {
             
             // Determine success
             let success = decodedResponse.status == "success"
-            completion(success, decodedResponse.error,decodedResponse.public_key)
+            completion(success, decodedResponse.error, decodedResponse.public_key)
         } catch {
             print("Error decoding JSON:", error)
             completion(false, "Error decoding JSON","")
