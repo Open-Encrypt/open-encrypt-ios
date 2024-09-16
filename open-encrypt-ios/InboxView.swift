@@ -82,6 +82,17 @@ struct KeysView: View {
 
             }
             
+            Button("Generate Keys"){
+                generateKeys(){ success, error, public_key, secret_key in
+                    // Update the state on the main thread
+                    DispatchQueue.main.async {
+                        getPublicKeyStatus = success
+                        getPublicKeyErrorMessage = error
+                        //publicKey = public_key
+                    }
+                }
+            }
+            
             // Display the retrieved public key
             if !publicKey.isEmpty {
                 Text("Public Key:")
@@ -143,14 +154,6 @@ struct InboxMessagesView: View {
                         }
                     }
                 }
-                
-                // TextField for username input
-                /*
-                TextField("Secret key:", text: $secretKey)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .autocapitalization(.none)
-                 */
                 
                 processMessages(messages: messageList)
                 
@@ -448,8 +451,9 @@ func generateKeys(completion: @escaping (Bool, String?, String, String) -> Void)
             print("Status: ", decodedResponse.status)
             print("Error: ", decodedResponse.error ?? "No error")
             
-            //print the first message
-            print("Public Key:",decodedResponse.public_key)
+            //print the public and secret keys
+            print("Gen Public Key:",decodedResponse.public_key)
+            print("Gen Secret Key",decodedResponse.secret_key)
             
             // Determine success
             let success = decodedResponse.status == "success"
