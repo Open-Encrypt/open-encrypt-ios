@@ -17,7 +17,7 @@ struct InboxView: View {
                     Label("Inbox", systemImage: "envelope.fill")
                 }
             
-            ViewPublicKeysView()
+            KeysView()
                 .tabItem {
                     Label("Keys", systemImage: "key.fill")
                 }
@@ -27,10 +27,11 @@ struct InboxView: View {
  
 
 
-struct ViewPublicKeysView: View {
+struct KeysView: View {
     @State private var getPublicKeyStatus: Bool = false
     @State private var getPublicKeyErrorMessage: String? = ""
     @State private var publicKey: String = ""
+    @State private var secretKey: String = ""
     
     var body: some View {
         VStack {
@@ -47,6 +48,38 @@ struct ViewPublicKeysView: View {
                         publicKey = public_key
                     }
                 }
+            }
+            
+            // TextField for username input
+            TextField("Secret key:", text: $secretKey)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .autocapitalization(.none)
+            
+            Button("Save Secret Key"){
+                let secretKey = secretKey.data(using: .utf8)!  // Example key as Data
+                let account = "com.open-encrypt-ios.user.secretKey" // A unique identifier for the key
+
+                let storeStatus = storeKey(keyData: secretKey, account: account)
+
+                if storeStatus == errSecSuccess {
+                    print("Secret key stored successfully!")
+                } else {
+                    print("Failed to store secret key with error code: \(storeStatus)")
+                }
+
+            }
+            
+            Button("View Secret Key"){
+                let account = "com.open-encrypt-ios.user.secretKey" // A unique identifier for the key
+                
+                if let retrievedKey = retrieveKey(account: account) {
+                    let keyString = String(data: retrievedKey, encoding: .utf8)
+                    print("Retrieved secret key: \(keyString ?? "Invalid Key")")
+                } else {
+                    print("Failed to retrieve secret key")
+                }
+
             }
             
             // Display the retrieved public key
@@ -92,6 +125,15 @@ struct InboxMessagesView: View {
                 }
                 
                 Button("Get Messages"){
+                    
+                    let account = "com.open-encrypt-ios.user.secretKey"
+                    if let retrievedKey = retrieveKey(account: account) {
+                        let secretKey = String(data: retrievedKey, encoding: .utf8)
+                        print("Retrieved secret key: \(secretKey ?? "Invalid Key")")
+                    } else {
+                        print("Failed to retrieve secret key")
+                    }
+                    
                     getMessages(secretKey: secretKey){ success, error, messages in
                         // Update the state on the main thread
                         DispatchQueue.main.async {
@@ -113,6 +155,36 @@ struct InboxMessagesView: View {
             }
     }
 }
+
+import Security
+
+func storeKey(keyData: Data, account: String) -> OSStatus {
+    let query: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrAccount as String: account,
+        kSecValueData as String: keyData
+    ]
+    SecItemDelete(query as CFDictionary) // Delete any existing item
+    return SecItemAdd(query as CFDictionary, nil)
+}
+
+func retrieveKey(account: String) -> Data? {
+    let query: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrAccount as String: account,
+        kSecReturnData as String: kCFBooleanTrue!,
+        kSecMatchLimit as String: kSecMatchLimitOne
+    ]
+    
+    var dataTypeRef: AnyObject?
+    let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
+    
+    if status == errSecSuccess {
+        return dataTypeRef as? Data
+    }
+    return nil
+}
+
 
 // Define the function with named tuple elements
 func processMessages(messages: [(from: String, to: String, message: String)]) -> some View {
