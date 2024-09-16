@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct LoginView: View {
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var loginSuccessful: Bool = checkToken()
@@ -141,5 +141,5 @@ func validLogin(username: String, password: String, completion: @escaping (Bool,
 
 
 #Preview {
-    ContentView()
+    LoginView()
 }

@@ -7,17 +7,54 @@
 
 import SwiftUI
 
+
 struct InboxView: View {
+    
+    var body: some View {
+        TabView {
+            InboxMessagesView()
+                .tabItem {
+                    Label("Inbox", systemImage: "envelope.fill")
+                }
+            
+            ViewPublicKeysView()
+                .tabItem {
+                    Label("Public Keys", systemImage: "key.fill")
+                }
+        }
+    }
+}
+ 
+
+
+struct ViewPublicKeysView: View {
+    var body: some View {
+        VStack {
+            Text("Stored Public Keys")
+                .font(.headline)
+                .padding()
+            
+            // Display stored public keys
+            List {
+                Text("Public Key 1")
+                Text("Public Key 2")
+            }
+        }
+    }
+}
+
+    
+    
+struct InboxMessagesView: View {
     @State private var logout: Bool = false
     @State private var secretKey: String = ""
     @State private var getMessagesStatus: Bool = false
     @State private var getMessagesErrorMessage: String? = ""
     @State private var messageList: [(from: String,to: String,message: String)] = []
     @Environment(\.dismiss) private var dismiss
-    
+        
     var body: some View {
-        NavigationStack {
-            VStack{
+        VStack{
                 Text("Inbox")
                     .font(.largeTitle)
                     .navigationBarBackButtonHidden(true)
@@ -39,7 +76,6 @@ struct InboxView: View {
                             getMessagesStatus = success
                             getMessagesErrorMessage = error
                             messageList = messages
-                            print(messageList[0].from)
                         }
                     }
                 }
@@ -53,7 +89,6 @@ struct InboxView: View {
                 processMessages(messages: messageList)
                 
             }
-        }
     }
 }
 

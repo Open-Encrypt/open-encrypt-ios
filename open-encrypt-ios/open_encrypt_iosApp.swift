@@ -11,7 +11,7 @@ import SwiftUI
 struct open_encrypt_iosApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LoginView()
         }
     }
 }
