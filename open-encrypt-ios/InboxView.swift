@@ -21,7 +21,7 @@ struct InboxView: View {
                 .tabItem {
                     Label("Keys", systemImage: "key.fill")
                 }
-        }
+        }.navigationBarBackButtonHidden(true)
     }
 }
  

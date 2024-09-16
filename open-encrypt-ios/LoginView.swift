@@ -50,7 +50,7 @@ struct LoginView: View {
             .navigationDestination(isPresented: $loginSuccessful) {
                 InboxView()
             }
-
+            
         }
     }
 }
