@@ -128,8 +128,8 @@ struct InboxMessagesView: View {
                     
                     let account = "com.open-encrypt-ios.user.secretKey"
                     if let retrievedKey = retrieveKey(account: account) {
-                        let secretKey = String(data: retrievedKey, encoding: .utf8)
-                        print("Retrieved secret key: \(secretKey ?? "Invalid Key")")
+                        secretKey = String(data: retrievedKey, encoding: .utf8) ?? ""
+                        print("Retrieved secret key: \(secretKey)")
                     } else {
                         print("Failed to retrieve secret key")
                     }
@@ -145,10 +145,12 @@ struct InboxMessagesView: View {
                 }
                 
                 // TextField for username input
+                /*
                 TextField("Secret key:", text: $secretKey)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                     .autocapitalization(.none)
+                 */
                 
                 processMessages(messages: messageList)
                 
@@ -204,6 +206,8 @@ func processMessages(messages: [(from: String, to: String, message: String)]) ->
 
 // Define the function with a completion handler
 func getMessages(secretKey: String, completion: @escaping (Bool, String?, [(String,String,String)]) -> Void) {
+    
+    print("Passed secret key: \(secretKey)")
     
     // Declare username as an optional
     var username: String?
