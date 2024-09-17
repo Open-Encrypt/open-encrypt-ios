@@ -12,6 +12,10 @@ struct InboxView: View {
     
     var body: some View {
         TabView {
+            SendMessageView()
+                .tabItem {
+                    Label("Send Message", systemImage: "paperplane.fill")
+                }
             InboxMessagesView()
                 .tabItem {
                     Label("Inbox", systemImage: "envelope.fill")
@@ -22,6 +26,47 @@ struct InboxView: View {
                     Label("Keys", systemImage: "key.fill")
                 }
         }.navigationBarBackButtonHidden(true)
+    }
+}
+
+struct SendMessageView: View {
+    @State private var recipient: String = ""
+    @State private var message: String = ""
+    @State private var sendMessageStatus: Bool = false
+    @State private var sendMessageErrorMessage: String? = ""
+    
+    var body: some View {
+        VStack {
+            Text("Send Message")
+                .font(.headline)
+                .padding()
+            
+            // TextField for username input
+            TextField("To:", text: $recipient)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .autocapitalization(.none)
+            
+            // TextField for username input
+            TextEditor(text: $message)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .autocapitalization(.none)
+                .background(Color.white) // Background color
+                .border(Color.gray, width: 1) // Simple border
+                .frame(width: 300, height: 150) // Fixed width and height
+            //button to send message
+
+            Button("Send") {
+                sendMessage(recipient: recipient, message: message){ success, error in
+                    // Update the state on the main thread
+                    DispatchQueue.main.async {
+                        sendMessageStatus = success
+                        sendMessageErrorMessage = error
+                    }
+                }
+            }
+        }
     }
 }
  
@@ -35,7 +80,7 @@ struct KeysView: View {
     
     var body: some View {
         VStack {
-            Text("Stored Public Keys")
+            Text("Public/Secret Keys")
                 .font(.headline)
                 .padding()
             
@@ -51,10 +96,9 @@ struct KeysView: View {
             }
             
             Button("View Secret Key"){
-                let account = "com.open-encrypt-ios.user.secretKey" // A unique identifier for the key
-                
-                if let retrievedKey = retrieveKey(account: account) {
-                    secretKey = String(data: retrievedKey, encoding: .utf8) ?? ""
+                let username = UserDefaults.standard.string(forKey: "username")
+                if let retrievedKey = retrieveSecretKey(username: username!) {
+                    secretKey = retrievedKey
                     print("Retrieved secret key: \(secretKey)")
                 } else {
                     print("Failed to retrieve secret key")
@@ -74,18 +118,28 @@ struct KeysView: View {
                 }
             }
             
-            Button("Save Secret Key"){
-                let secretKey = secretKey.data(using: .utf8)!  // Example key as Data
-                let account = "com.open-encrypt-ios.user.secretKey" // A unique identifier for the key
-
-                let storeStatus = storeKey(keyData: secretKey, account: account)
-
-                if storeStatus == errSecSuccess {
-                    print("Secret key stored successfully!")
-                } else {
-                    print("Failed to store secret key with error code: \(storeStatus)")
+            Button("Save Public Key"){
+                savePublicKey(publicKey: publicKey){ success, error in
+                    // Update the state on the main thread
+                    DispatchQueue.main.async {
+                        getPublicKeyStatus = success
+                        getPublicKeyErrorMessage = error
+                    }
                 }
+            }
+            
+            Button("Save Secret Key") {
+                if let username = UserDefaults.standard.string(forKey: "username") {
+                    let storeStatus = storeSecretKey(secretKey: secretKey, username: username)
 
+                    if storeStatus == errSecSuccess {
+                        print("Secret key stored successfully!")
+                    } else {
+                        print("Failed to store secret key with error code: \(storeStatus)")
+                    }
+                } else {
+                    print("Username not found")
+                }
             }
             
             // TextField for username input
@@ -138,9 +192,9 @@ struct InboxMessagesView: View {
                 
                 Button("Get Messages"){
                     
-                    let account = "com.open-encrypt-ios.user.secretKey"
-                    if let retrievedKey = retrieveKey(account: account) {
-                        secretKey = String(data: retrievedKey, encoding: .utf8) ?? ""
+                    let username = UserDefaults.standard.string(forKey: "username")
+                    if let retrievedKey = retrieveSecretKey(username: username!) {
+                        secretKey = retrievedKey
                         print("Retrieved secret key: \(secretKey)")
                     } else {
                         print("Failed to retrieve secret key")
@@ -164,30 +218,38 @@ struct InboxMessagesView: View {
 
 import Security
 
-func storeKey(keyData: Data, account: String) -> OSStatus {
-    let query: [String: Any] = [
+func storeSecretKey(secretKey: String, username: String) -> OSStatus {
+    let keychainQuery: [String: Any] = [
         kSecClass as String: kSecClassGenericPassword,
-        kSecAttrAccount as String: account,
-        kSecValueData as String: keyData
+        kSecAttrAccount as String: username,  // Associate the key with the username
+        kSecAttrService as String: "com.open-encrypt-ios.app.secretkey",  // Unique service identifier
+        kSecValueData as String: secretKey.data(using: .utf8)!  // Convert secret key to data
     ]
-    SecItemDelete(query as CFDictionary) // Delete any existing item
-    return SecItemAdd(query as CFDictionary, nil)
+    
+    // Delete any existing key for this username before saving the new one
+    SecItemDelete(keychainQuery as CFDictionary)
+    
+    // Add the new secret key to the keychain
+    let status = SecItemAdd(keychainQuery as CFDictionary, nil)
+    return status
 }
 
-func retrieveKey(account: String) -> Data? {
-    let query: [String: Any] = [
+func retrieveSecretKey(username: String) -> String? {
+    let keychainQuery: [String: Any] = [
         kSecClass as String: kSecClassGenericPassword,
-        kSecAttrAccount as String: account,
-        kSecReturnData as String: kCFBooleanTrue!,
+        kSecAttrAccount as String: username, // Use username to fetch the correct key
+        kSecAttrService as String: "com.open-encrypt-ios.app.secretkey",
+        kSecReturnData as String: true,
         kSecMatchLimit as String: kSecMatchLimitOne
     ]
     
-    var dataTypeRef: AnyObject?
-    let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
+    var item: CFTypeRef?
+    let status = SecItemCopyMatching(keychainQuery as CFDictionary, &item)
     
-    if status == errSecSuccess {
-        return dataTypeRef as? Data
+    if status == errSecSuccess, let data = item as? Data {
+        return String(data: data, encoding: .utf8)
     }
+    
     return nil
 }
 
@@ -281,13 +343,15 @@ func getMessages(secretKey: String, completion: @escaping (Bool, String?, [(Stri
             //print the first message
             print("From:",decodedResponse.from)
             print("To:",decodedResponse.to)
-            print("Messages:",decodedResponse.messages[2])
+            print("Messages:",decodedResponse.messages)
             
             // zip three lists of from, to, message into a single list
             var messages: [(from: String, to: String, message: String)] = []
             let numMessages = decodedResponse.messages.count
-            for i in 0...numMessages-1 {
-                messages.append((from: decodedResponse.from[i], to: decodedResponse.to[i], message: decodedResponse.messages[i]))
+            if(numMessages > 0){
+                for i in 0...numMessages-1 {
+                    messages.append((from: decodedResponse.from[i], to: decodedResponse.to[i], message: decodedResponse.messages[i]))
+                }
             }
             
             // Determine success
@@ -462,6 +526,165 @@ func generateKeys(completion: @escaping (Bool, String?, String, String) -> Void)
         } catch {
             print("Error decoding JSON:", error)
             completion(false, "Error decoding JSON","","")
+        }
+    }
+
+    // Start the task
+    task.resume()
+}
+
+// Define the function with a completion handler
+func savePublicKey(publicKey: String, completion: @escaping (Bool, String?) -> Void) {
+    
+    print("Passed public key: \(publicKey)")
+    
+    // Declare username as an optional
+    var username: String?
+    var token: String?
+
+    if checkToken() {
+        // retrieve the username from UserDefaults
+        username = UserDefaults.standard.string(forKey: "username")
+        token = UserDefaults.standard.string(forKey: "token")
+        print("Username from UserDefaults: \(username!)")
+        print("Token from UserDefaults: \(token!)")
+    }
+    else{
+        print("Invalid or no token.")
+        completion(false,"Invalid or no token.")
+        return
+    }
+    
+    // Define the URL of the endpoint
+    guard let url = URL(string: "https://open-encrypt.com/inbox_ios.php") else {
+        fatalError("Invalid URL")
+    }
+
+    // Create the URLRequest object
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    
+    // Set the content type for JSON
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+    // Create JSON data
+    let json: [String: Any] = ["username": username!, "token": token!, "action": "save_public_key", "public_key": publicKey]
+    let jsonData = try? JSONSerialization.data(withJSONObject: json)
+
+    // Set HTTP body
+    request.httpBody = jsonData
+    
+    // Create a URLSession data task
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            print("Error: \(error.localizedDescription)")
+            completion(false, nil)
+            return
+        }
+        
+        guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            print("Error: Invalid response or no data")
+            completion(false, nil)
+            return
+        }
+        
+        // Define the shape and type of the JSON response
+        struct SavePublicKeyResponse: Codable {
+            let status: String
+            let error: String?
+        }
+        
+        let decoder = JSONDecoder()
+        do {
+            let decodedResponse = try decoder.decode(SavePublicKeyResponse.self, from: data)
+            print("Status: ", decodedResponse.status)
+            print("Error: ", decodedResponse.error ?? "No error")
+            
+            
+            // Determine success
+            let success = decodedResponse.status == "success"
+            completion(success, decodedResponse.error)
+        } catch {
+            print("Error decoding JSON:", error)
+            completion(false, "Error decoding JSON")
+        }
+    }
+
+    // Start the task
+    task.resume()
+}
+
+// Define the function with a completion handler
+func sendMessage(recipient: String, message: String, completion: @escaping (Bool, String?) -> Void) {
+    
+    // Declare username as an optional
+    var username: String?
+    var token: String?
+
+    if checkToken() {
+        // retrieve the username from UserDefaults
+        username = UserDefaults.standard.string(forKey: "username")
+        token = UserDefaults.standard.string(forKey: "token")
+        print("Username from UserDefaults: \(username!)")
+        print("Token from UserDefaults: \(token!)")
+    }
+    else{
+        print("Invalid or no token.")
+        completion(false,"Invalid or no token.")
+        return
+    }
+    
+    // Define the URL of the endpoint
+    guard let url = URL(string: "https://open-encrypt.com/inbox_ios.php") else {
+        fatalError("Invalid URL")
+    }
+
+    // Create the URLRequest object
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    
+    // Set the content type for JSON
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+    // Create JSON data
+    let json: [String: Any] = ["username": username!, "token": token!, "action": "send_message","message": message, "recipient": recipient]
+    let jsonData = try? JSONSerialization.data(withJSONObject: json)
+
+    // Set HTTP body
+    request.httpBody = jsonData
+    
+    // Create a URLSession data task
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            print("Error: \(error.localizedDescription)")
+            completion(false, nil)
+            return
+        }
+        
+        guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            print("Error: Invalid response or no data")
+            completion(false, nil)
+            return
+        }
+        
+        // Define the shape and type of the JSON response
+        struct MessagesResponse: Codable {
+            let status: String
+            let error: String?
+        }
+        
+        let decoder = JSONDecoder()
+        do {
+            let decodedResponse = try decoder.decode(MessagesResponse.self, from: data)
+            print("Status: ", decodedResponse.status)
+            print("Error: ", decodedResponse.error ?? "No error")
+            
+            // Determine success
+            let success = decodedResponse.status == "success"
+            completion(success, decodedResponse.error)
+        } catch {
+            print("Error decoding JSON:", error)
+            completion(false, "Error decoding JSON")
         }
     }
 
