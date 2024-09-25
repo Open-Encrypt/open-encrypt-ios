@@ -125,11 +125,11 @@ struct KeysView: View {
             
             Button("Save Public Key"){
                 let params = ["public_key": publicKey, "action": "save_public_key"]
-                savePublicKey(params: params){ success, error in
+                savePublicKey(params: params){ returnValues in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
-                        getPublicKeyStatus = success
-                        getPublicKeyErrorMessage = error
+                        getPublicKeyStatus = returnValues["status"] as! Bool
+                        getPublicKeyErrorMessage = returnValues["error"] as? String
                     }
                 }
             }
@@ -565,10 +565,13 @@ func generateKeys(params: [String: String], completion: @escaping ([String: Any]
 }
 
 // Define the function with a completion handler
-func savePublicKey(params: [String: String], completion: @escaping (Bool, String?) -> Void) {
+func savePublicKey(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
     
     let publicKey = params["public_key"]
     let action = params["action"]
+    
+    //return values
+    var returnValues : [String: Any] = ["status": false, "error": ""]
     
     // Declare username as an optional
     var username: String?
@@ -583,7 +586,8 @@ func savePublicKey(params: [String: String], completion: @escaping (Bool, String
     }
     else{
         print("Invalid or no token.")
-        completion(false,"Invalid or no token.")
+        returnValues["error"] = "Invalid or no token."
+        completion(returnValues)
         return
     }
     
@@ -610,13 +614,15 @@ func savePublicKey(params: [String: String], completion: @escaping (Bool, String
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
             print("Error: \(error.localizedDescription)")
-            completion(false, nil)
+            returnValues["error"] = error.localizedDescription
+            completion(returnValues)
             return
         }
         
         guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            print("Error: Invalid response or no data")
-            completion(false, nil)
+            print("Error: Invalid response or no data.")
+            returnValues["error"] = "Invalid response or no data."
+            completion(returnValues)
             return
         }
         
@@ -634,11 +640,13 @@ func savePublicKey(params: [String: String], completion: @escaping (Bool, String
             
             
             // Determine success
-            let success = decodedResponse.status == "success"
-            completion(success, decodedResponse.error)
+            returnValues["status"] = decodedResponse.status == "success"
+            returnValues["error"] = decodedResponse.error
+            completion(returnValues)
         } catch {
             print("Error decoding JSON:", error)
-            completion(false, "Error decoding JSON")
+            returnValues["error"] = "Error decoding JSON."
+            completion(returnValues)
         }
     }
 
