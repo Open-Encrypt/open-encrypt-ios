@@ -81,7 +81,6 @@
 			isa = PBXGroup;
 			children = (
 				D08459A12C926812000D5D03 /* open-encrypt-ios */,
-				D08459B22C926814000D5D03 /* open-encrypt-iosTests */,
 				D08459BC2C926814000D5D03 /* open-encrypt-iosUITests */,
 				D08459A02C926812000D5D03 /* Products */,
 			);
@@ -112,6 +111,7 @@
 		D08459A82C926813000D5D03 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
+				D08459B22C926814000D5D03 /* open-encrypt-iosTests */,
 				D08459A92C926813000D5D03 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
