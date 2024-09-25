@@ -112,13 +112,13 @@ struct KeysView: View {
             Button("Generate Keys"){
                 let params = ["action": "generate_keys"]
                 
-                generateKeys(params: params){ success, error, keys in
+                generateKeys(params: params){ returnValues in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
-                        getPublicKeyStatus = success
-                        getPublicKeyErrorMessage = error
-                        publicKey = keys["public_key"]!
-                        secretKey = keys["secret_key"]!
+                        getPublicKeyStatus = returnValues["status"] as! Bool
+                        getPublicKeyErrorMessage = returnValues["error"] as? String
+                        publicKey = returnValues["public_key"] as! String
+                        secretKey = returnValues["secret_key"] as! String
                     }
                 }
             }
@@ -470,10 +470,10 @@ func getPublicKey(params: [String: String], completion: @escaping ([String: Any]
 }
 
 // Define the function with a completion handler
-func generateKeys(params: [String: String], completion: @escaping (Bool, String?, [String: String]) -> Void) {
+func generateKeys(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
     
     let action = params["action"]
-    var keys = ["public_key": "","secret_key": ""]
+    var returnValues : [String: Any] = ["status": false, "error": "", "public_key": "","secret_key": ""]
     
     // Declare username as an optional
     var username: String?
@@ -488,7 +488,8 @@ func generateKeys(params: [String: String], completion: @escaping (Bool, String?
     }
     else{
         print("Invalid or no token.")
-        completion(false,"Invalid or no token.", keys)
+        returnValues["error"] = "Invalid or no token."
+        completion(returnValues)
         return
     }
     
@@ -515,13 +516,14 @@ func generateKeys(params: [String: String], completion: @escaping (Bool, String?
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
             print("Error: \(error.localizedDescription)")
-            completion(false, nil,keys)
+            completion(returnValues)
             return
         }
         
         guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            print("Error: Invalid response or no data")
-            completion(false, nil, keys)
+            print("Error: Invalid response or no data.")
+            returnValues["error"] = "Invalid response or no data."
+            completion(returnValues)
             return
         }
         
@@ -539,19 +541,22 @@ func generateKeys(params: [String: String], completion: @escaping (Bool, String?
             print("Status: ", decodedResponse.status)
             print("Error: ", decodedResponse.error ?? "No error")
             
+            // Determine success
+            returnValues["status"] = decodedResponse.status == "success"
+            returnValues["error"] = decodedResponse.error ?? "No error"
+            
             //print the public and secret keys
             print("Gen Public Key:",decodedResponse.public_key)
             print("Gen Secret Key",decodedResponse.secret_key)
             
-            keys["public_key"] = decodedResponse.public_key
-            keys["secret_key"] = decodedResponse.secret_key
+            returnValues["public_key"] = decodedResponse.public_key
+            returnValues["secret_key"] = decodedResponse.secret_key
             
-            // Determine success
-            let success = decodedResponse.status == "success"
-            completion(success, decodedResponse.error,keys)
+            completion(returnValues)
         } catch {
             print("Error decoding JSON:", error)
-            completion(false, "Error decoding JSON",keys)
+            returnValues["error"] = "Error decoding JSON."
+            completion(returnValues)
         }
     }
 
