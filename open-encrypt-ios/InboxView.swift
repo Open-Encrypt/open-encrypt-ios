@@ -59,11 +59,11 @@ struct SendMessageView: View {
 
             Button("Send") {
                 let params = ["recipient": recipient, "message": message, "action": "send_message"]
-                sendMessage(params: params){ success, error in
+                sendMessage(params: params){ returnValues in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
-                        sendMessageStatus = success
-                        sendMessageErrorMessage = error
+                        sendMessageStatus = returnValues["status"] as! Bool
+                        sendMessageErrorMessage = returnValues["error"] as? String
                     }
                 }
             }
@@ -177,7 +177,7 @@ struct InboxMessagesView: View {
     @State private var secretKey: String = ""
     @State private var getMessagesStatus: Bool = false
     @State private var getMessagesErrorMessage: String? = ""
-    @State private var messageList: [(from: String,to: String,message: String)] = []
+    @State private var messageList: [(String,String,String)] = []
     @Environment(\.dismiss) private var dismiss
         
     var body: some View {
@@ -208,12 +208,23 @@ struct InboxMessagesView: View {
                     
                     let params = ["secret_key": secretKey, "action": "get_messages"]
                     
-                    getMessages(params: params){ success, error, messages in
+                    getMessages(params: params){ returnValues in
                         // Update the state on the main thread
                         DispatchQueue.main.async {
-                            getMessagesStatus = success
-                            getMessagesErrorMessage = error
-                            messageList = messages
+                            getMessagesStatus = returnValues["status"] as! Bool
+                            getMessagesErrorMessage = returnValues["error"] as? String
+                            
+                            //retrieve from, to, messages from response
+                            let from = returnValues["from"] as! [String]
+                            let to = returnValues["to"] as! [String]
+                            let messages = returnValues["messages"] as! [String]
+                            
+                            //zip from, to, messages into single list
+                            for i in 0..<from.count {
+                                let tuple = (from[i], to[i], messages[i])
+                                messageList.append(tuple)
+                            }
+
                         }
                     }
                 }
@@ -279,10 +290,14 @@ func processMessages(messages: [(from: String, to: String, message: String)]) ->
 
 
 // Define the function with a completion handler
-func getMessages(params: [String: String], completion: @escaping (Bool, String?, [(String,String,String)]) -> Void) {
+func getMessages(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
     
+    //fetch parameters
     let secretKey = params["secret_key"]
     let action = params["action"]
+    
+    //set return values
+    var returnValues : [String : Any] = ["status": false, "error": "", "from": [], "to": [], "messages": []]
     
     // Declare username as an optional
     var username: String?
@@ -297,7 +312,8 @@ func getMessages(params: [String: String], completion: @escaping (Bool, String?,
     }
     else{
         print("Invalid or no token.")
-        completion(false,"Invalid or no token.", [])
+        returnValues["error"] = "Invalid or no token."
+        completion(returnValues)
         return
     }
     
@@ -324,13 +340,15 @@ func getMessages(params: [String: String], completion: @escaping (Bool, String?,
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
             print("Error: \(error.localizedDescription)")
-            completion(false, nil, [])
+            returnValues["error"] = error.localizedDescription
+            completion(returnValues)
             return
         }
         
         guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            print("Error: Invalid response or no data")
-            completion(false, nil, [])
+            print("Error: Invalid response or no data.")
+            returnValues["error"] = "Invalid response or no data."
+            completion(returnValues)
             return
         }
         
@@ -349,26 +367,24 @@ func getMessages(params: [String: String], completion: @escaping (Bool, String?,
             print("Status: ", decodedResponse.status)
             print("Error: ", decodedResponse.error ?? "No error")
             
-            //print the first message
+            returnValues["status"] = decodedResponse.status == "success"
+            returnValues["error"] = decodedResponse.error ?? "No error"
+            
+            //print messages
             print("From:",decodedResponse.from)
             print("To:",decodedResponse.to)
             print("Messages:",decodedResponse.messages)
             
-            // zip three lists of from, to, message into a single list
-            var messages: [(from: String, to: String, message: String)] = []
-            let numMessages = decodedResponse.messages.count
-            if(numMessages > 0){
-                for i in 0...numMessages-1 {
-                    messages.append((from: decodedResponse.from[i], to: decodedResponse.to[i], message: decodedResponse.messages[i]))
-                }
-            }
+            //set return values from JSON response
+            returnValues["from"] = decodedResponse.from
+            returnValues["to"] = decodedResponse.to
+            returnValues["messages"] = decodedResponse.messages
             
-            // Determine success
-            let success = decodedResponse.status == "success"
-            completion(success, decodedResponse.error,messages)
+            completion(returnValues)
         } catch {
             print("Error decoding JSON:", error)
-            completion(false, "Error decoding JSON",[])
+            returnValues["error"] = "Error decoding JSON."
+            completion(returnValues)
         }
     }
 
@@ -655,11 +671,15 @@ func savePublicKey(params: [String: String], completion: @escaping ([String: Any
 }
 
 // Define the function with a completion handler
-func sendMessage(params: [String: String], completion: @escaping (Bool, String?) -> Void) {
+func sendMessage(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
     
+    //get parameters
     let message = params["message"]
     let recipient = params["recipient"]
     let action = params["action"]
+    
+    //initialize returnValues
+    var returnValues: [String: Any] = ["status": false, "error": ""]
     
     // Declare username as an optional
     var username: String?
@@ -674,7 +694,8 @@ func sendMessage(params: [String: String], completion: @escaping (Bool, String?)
     }
     else{
         print("Invalid or no token.")
-        completion(false,"Invalid or no token.")
+        returnValues["error"] = "Invalid or no token."
+        completion(returnValues)
         return
     }
     
@@ -701,13 +722,15 @@ func sendMessage(params: [String: String], completion: @escaping (Bool, String?)
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
             print("Error: \(error.localizedDescription)")
-            completion(false, nil)
+            returnValues["error"] = error.localizedDescription
+            completion(returnValues)
             return
         }
         
         guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            print("Error: Invalid response or no data")
-            completion(false, nil)
+            print("Error: Invalid response or no data.")
+            returnValues["error"] = "Error: Invalid response or no data."
+            completion(returnValues)
             return
         }
         
@@ -724,11 +747,12 @@ func sendMessage(params: [String: String], completion: @escaping (Bool, String?)
             print("Error: ", decodedResponse.error ?? "No error")
             
             // Determine success
-            let success = decodedResponse.status == "success"
-            completion(success, decodedResponse.error)
+            returnValues["success"] = decodedResponse.status == "success"
+            returnValues["error"] = decodedResponse.error
+            completion(returnValues)
         } catch {
             print("Error decoding JSON:", error)
-            completion(false, "Error decoding JSON")
+            completion(returnValues)
         }
     }
 
