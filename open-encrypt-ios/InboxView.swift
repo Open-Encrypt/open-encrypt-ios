@@ -58,7 +58,8 @@ struct SendMessageView: View {
             //button to send message
 
             Button("Send") {
-                sendMessage(recipient: recipient, message: message){ success, error in
+                let params = ["recipient": recipient, "message": message, "action": "send_message"]
+                sendMessage(params: params){ success, error in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
                         sendMessageStatus = success
@@ -85,7 +86,9 @@ struct KeysView: View {
                 .padding()
             
             Button("View Public Key"){
-                getPublicKey(){ success, error, public_key in
+                let params = ["action": "get_public_key"]
+                
+                getPublicKey(params: params){ success, error, public_key in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
                         getPublicKeyStatus = success
@@ -107,7 +110,9 @@ struct KeysView: View {
             }
             
             Button("Generate Keys"){
-                generateKeys(){ success, error, public_key, secret_key in
+                let params = ["action": "generate_keys"]
+                
+                generateKeys(params: params){ success, error, public_key, secret_key in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
                         getPublicKeyStatus = success
@@ -119,7 +124,8 @@ struct KeysView: View {
             }
             
             Button("Save Public Key"){
-                savePublicKey(publicKey: publicKey){ success, error in
+                let params = ["public_key": publicKey, "action": "save_public_key"]
+                savePublicKey(params: params){ success, error in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
                         getPublicKeyStatus = success
@@ -200,7 +206,9 @@ struct InboxMessagesView: View {
                         print("Failed to retrieve secret key")
                     }
                     
-                    getMessages(secretKey: secretKey){ success, error, messages in
+                    let params = ["secret_key": secretKey, "action": "get_messages"]
+                    
+                    getMessages(params: params){ success, error, messages in
                         // Update the state on the main thread
                         DispatchQueue.main.async {
                             getMessagesStatus = success
@@ -271,9 +279,10 @@ func processMessages(messages: [(from: String, to: String, message: String)]) ->
 
 
 // Define the function with a completion handler
-func getMessages(secretKey: String, completion: @escaping (Bool, String?, [(String,String,String)]) -> Void) {
+func getMessages(params: [String: String], completion: @escaping (Bool, String?, [(String,String,String)]) -> Void) {
     
-    print("Passed secret key: \(secretKey)")
+    let secretKey = params["secret_key"]
+    let action = params["action"]
     
     // Declare username as an optional
     var username: String?
@@ -305,7 +314,7 @@ func getMessages(secretKey: String, completion: @escaping (Bool, String?, [(Stri
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
     // Create JSON data
-    let json: [String: Any] = ["username": username!, "token": token!, "action": "get_messages", "secret_key": secretKey]
+    let json: [String: Any] = ["username": username!, "token": token!, "action": action!, "secret_key": secretKey!]
     let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
     // Set HTTP body
@@ -368,7 +377,9 @@ func getMessages(secretKey: String, completion: @escaping (Bool, String?, [(Stri
 }
 
 // Define the function with a completion handler
-func getPublicKey(completion: @escaping (Bool, String?, String) -> Void) {
+func getPublicKey(params: [String: String], completion: @escaping (Bool, String?, String) -> Void) {
+    
+    let action = params["action"]
     
     // Declare username as an optional
     var username: String?
@@ -400,7 +411,7 @@ func getPublicKey(completion: @escaping (Bool, String?, String) -> Void) {
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
     // Create JSON data
-    let json: [String: Any] = ["username": username!, "token": token!, "action": "get_public_key"]
+    let json: [String: Any] = ["username": username!, "token": token!, "action": action!]
     let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
     // Set HTTP body
@@ -450,7 +461,9 @@ func getPublicKey(completion: @escaping (Bool, String?, String) -> Void) {
 }
 
 // Define the function with a completion handler
-func generateKeys(completion: @escaping (Bool, String?, String, String) -> Void) {
+func generateKeys(params: [String: String], completion: @escaping (Bool, String?, String, String) -> Void) {
+    
+    let action = params["action"]
     
     // Declare username as an optional
     var username: String?
@@ -482,7 +495,7 @@ func generateKeys(completion: @escaping (Bool, String?, String, String) -> Void)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
     // Create JSON data
-    let json: [String: Any] = ["username": username!, "token": token!, "action": "generate_keys"]
+    let json: [String: Any] = ["username": username!, "token": token!, "action": action!]
     let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
     // Set HTTP body
@@ -534,9 +547,10 @@ func generateKeys(completion: @escaping (Bool, String?, String, String) -> Void)
 }
 
 // Define the function with a completion handler
-func savePublicKey(publicKey: String, completion: @escaping (Bool, String?) -> Void) {
+func savePublicKey(params: [String: String], completion: @escaping (Bool, String?) -> Void) {
     
-    print("Passed public key: \(publicKey)")
+    let publicKey = params["public_key"]
+    let action = params["action"]
     
     // Declare username as an optional
     var username: String?
@@ -568,7 +582,7 @@ func savePublicKey(publicKey: String, completion: @escaping (Bool, String?) -> V
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
     // Create JSON data
-    let json: [String: Any] = ["username": username!, "token": token!, "action": "save_public_key", "public_key": publicKey]
+    let json: [String: Any] = ["username": username!, "token": token!, "action": action!, "public_key": publicKey!]
     let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
     // Set HTTP body
@@ -615,7 +629,11 @@ func savePublicKey(publicKey: String, completion: @escaping (Bool, String?) -> V
 }
 
 // Define the function with a completion handler
-func sendMessage(recipient: String, message: String, completion: @escaping (Bool, String?) -> Void) {
+func sendMessage(params: [String: String], completion: @escaping (Bool, String?) -> Void) {
+    
+    let message = params["message"]
+    let recipient = params["recipient"]
+    let action = params["action"]
     
     // Declare username as an optional
     var username: String?
@@ -647,7 +665,7 @@ func sendMessage(recipient: String, message: String, completion: @escaping (Bool
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
     // Create JSON data
-    let json: [String: Any] = ["username": username!, "token": token!, "action": "send_message","message": message, "recipient": recipient]
+    let json: [String: Any] = ["username": username!, "token": token!, "action": action!,"message": message!, "recipient": recipient!]
     let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
     // Set HTTP body
