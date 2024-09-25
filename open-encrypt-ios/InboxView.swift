@@ -88,12 +88,12 @@ struct KeysView: View {
             Button("View Public Key"){
                 let params = ["action": "get_public_key"]
                 
-                getPublicKey(params: params){ success, error, public_key in
+                getPublicKey(params: params){ returnValues in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
-                        getPublicKeyStatus = success
-                        getPublicKeyErrorMessage = error
-                        publicKey = public_key
+                        getPublicKeyStatus = returnValues["status"] as! Bool
+                        getPublicKeyErrorMessage = returnValues["error"] as? String
+                        publicKey = returnValues["public_key"] as! String
                     }
                 }
             }
@@ -112,13 +112,13 @@ struct KeysView: View {
             Button("Generate Keys"){
                 let params = ["action": "generate_keys"]
                 
-                generateKeys(params: params){ success, error, public_key, secret_key in
+                generateKeys(params: params){ success, error, keys in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
                         getPublicKeyStatus = success
                         getPublicKeyErrorMessage = error
-                        publicKey = public_key
-                        secretKey = secret_key
+                        publicKey = keys["public_key"]!
+                        secretKey = keys["secret_key"]!
                     }
                 }
             }
@@ -377,9 +377,13 @@ func getMessages(params: [String: String], completion: @escaping (Bool, String?,
 }
 
 // Define the function with a completion handler
-func getPublicKey(params: [String: String], completion: @escaping (Bool, String?, String) -> Void) {
+func getPublicKey(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
     
+    //action to send to API endpoint
     let action = params["action"]
+    
+    //return values as associative array
+    var returnValues : [String: Any] = ["status": false, "error": "", "public_key": ""]
     
     // Declare username as an optional
     var username: String?
@@ -394,7 +398,8 @@ func getPublicKey(params: [String: String], completion: @escaping (Bool, String?
     }
     else{
         print("Invalid or no token.")
-        completion(false,"Invalid or no token.", "")
+        returnValues["error"] = "Invalid or no token."
+        completion(returnValues)
         return
     }
     
@@ -421,13 +426,14 @@ func getPublicKey(params: [String: String], completion: @escaping (Bool, String?
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
             print("Error: \(error.localizedDescription)")
-            completion(false, nil,"")
+            completion(returnValues)
             return
         }
         
         guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             print("Error: Invalid response or no data")
-            completion(false, nil, "")
+            returnValues["error"] = "Error: Invalid response or no data"
+            completion(returnValues)
             return
         }
         
@@ -448,11 +454,14 @@ func getPublicKey(params: [String: String], completion: @escaping (Bool, String?
             print("Public Key:",decodedResponse.public_key)
             
             // Determine success
-            let success = decodedResponse.status == "success"
-            completion(success, decodedResponse.error, decodedResponse.public_key)
+            returnValues["success"] = decodedResponse.status == "success"
+            returnValues["error"] = decodedResponse.error
+            returnValues["public_key"] = decodedResponse.public_key
+            completion(returnValues)
         } catch {
             print("Error decoding JSON:", error)
-            completion(false, "Error decoding JSON","")
+            returnValues["error"] = "Error decoding JSON"
+            completion(returnValues)
         }
     }
 
@@ -461,9 +470,10 @@ func getPublicKey(params: [String: String], completion: @escaping (Bool, String?
 }
 
 // Define the function with a completion handler
-func generateKeys(params: [String: String], completion: @escaping (Bool, String?, String, String) -> Void) {
+func generateKeys(params: [String: String], completion: @escaping (Bool, String?, [String: String]) -> Void) {
     
     let action = params["action"]
+    var keys = ["public_key": "","secret_key": ""]
     
     // Declare username as an optional
     var username: String?
@@ -478,7 +488,7 @@ func generateKeys(params: [String: String], completion: @escaping (Bool, String?
     }
     else{
         print("Invalid or no token.")
-        completion(false,"Invalid or no token.", "", "")
+        completion(false,"Invalid or no token.", keys)
         return
     }
     
@@ -505,13 +515,13 @@ func generateKeys(params: [String: String], completion: @escaping (Bool, String?
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
             print("Error: \(error.localizedDescription)")
-            completion(false, nil,"","")
+            completion(false, nil,keys)
             return
         }
         
         guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             print("Error: Invalid response or no data")
-            completion(false, nil, "","")
+            completion(false, nil, keys)
             return
         }
         
@@ -533,12 +543,15 @@ func generateKeys(params: [String: String], completion: @escaping (Bool, String?
             print("Gen Public Key:",decodedResponse.public_key)
             print("Gen Secret Key",decodedResponse.secret_key)
             
+            keys["public_key"] = decodedResponse.public_key
+            keys["secret_key"] = decodedResponse.secret_key
+            
             // Determine success
             let success = decodedResponse.status == "success"
-            completion(success, decodedResponse.error, decodedResponse.public_key,decodedResponse.secret_key)
+            completion(success, decodedResponse.error,keys)
         } catch {
             print("Error decoding JSON:", error)
-            completion(false, "Error decoding JSON","","")
+            completion(false, "Error decoding JSON",keys)
         }
     }
 
