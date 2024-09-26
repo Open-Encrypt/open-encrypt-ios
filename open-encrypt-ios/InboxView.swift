@@ -208,7 +208,7 @@ struct InboxMessagesView: View {
                     
                     let params = ["secret_key": secretKey, "action": "get_messages"]
                     
-                    getMessages(params: params){ returnValues in
+                    sendPOSTrequest(params: params){ returnValues in
                         // Update the state on the main thread
                         DispatchQueue.main.async {
                             getMessagesStatus = returnValues["status"] as! Bool
@@ -290,14 +290,26 @@ func processMessages(messages: [(from: String, to: String, message: String)]) ->
 
 
 // Define the function with a completion handler
-func getMessages(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
+func sendPOSTrequest(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
     
     //fetch parameters
     let secretKey = params["secret_key"]
     let action = params["action"]
     
-    //set return values
-    var returnValues : [String : Any] = ["status": false, "error": "", "from": [], "to": [], "messages": []]
+    //initialize return values and API endpoint
+    var returnValues : [String : Any] = ["status": false, "error": ""]
+    var endpoint = ""
+    
+    //initalize returnValues based on action
+    switch action{
+    case "get_messages":
+        endpoint = "inbox_ios.php"
+        returnValues["from"] = []
+        returnValues["to"] = []
+        returnValues["messages"] = []
+    default:
+        print("Unknown action: \(String(describing: action))")
+    }
     
     // Declare username as an optional
     var username: String?
@@ -318,7 +330,7 @@ func getMessages(params: [String: String], completion: @escaping ([String: Any])
     }
     
     // Define the URL of the endpoint
-    guard let url = URL(string: "https://open-encrypt.com/inbox_ios.php") else {
+    guard let url = URL(string: "https://open-encrypt.com/\(endpoint)") else {
         fatalError("Invalid URL")
     }
 
@@ -330,7 +342,10 @@ func getMessages(params: [String: String], completion: @escaping ([String: Any])
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
     // Create JSON data
-    let json: [String: Any] = ["username": username!, "token": token!, "action": action!, "secret_key": secretKey!]
+    var json: [String: Any] = ["username": username!, "token": token!, "action": action!]
+    if action == "get_messages"{
+        json["secret_key"] = secretKey!
+    }
     let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
     // Set HTTP body
@@ -362,29 +377,36 @@ func getMessages(params: [String: String], completion: @escaping ([String: Any])
         }
         
         let decoder = JSONDecoder()
-        do {
-            let decodedResponse = try decoder.decode(MessagesResponse.self, from: data)
-            print("Status: ", decodedResponse.status)
-            print("Error: ", decodedResponse.error ?? "No error")
-            
-            returnValues["status"] = decodedResponse.status == "success"
-            returnValues["error"] = decodedResponse.error ?? "No error"
-            
-            //print messages
-            print("From:",decodedResponse.from)
-            print("To:",decodedResponse.to)
-            print("Messages:",decodedResponse.messages)
-            
-            //set return values from JSON response
-            returnValues["from"] = decodedResponse.from
-            returnValues["to"] = decodedResponse.to
-            returnValues["messages"] = decodedResponse.messages
-            
-            completion(returnValues)
-        } catch {
-            print("Error decoding JSON:", error)
-            returnValues["error"] = "Error decoding JSON."
-            completion(returnValues)
+        
+        //decode the response based on the reponse type
+        switch action {
+        case "get_messages":
+                do {
+                    // Decode as MessagesResponse
+                    let decodedResponse = try decoder.decode(MessagesResponse.self, from: data)
+                    print("Messages Response:")
+                    print("Status: \(decodedResponse.status)")
+                    print("Error: ", decodedResponse.error ?? "No error")
+                    print("From: \(decodedResponse.from)")
+                    print("To: \(decodedResponse.to)")
+                    print("Messages: \(decodedResponse.messages)")
+                    
+                    //set return values based on JSON response
+                    returnValues["status"] = decodedResponse.status == "success"
+                    returnValues["error"] = decodedResponse.error ?? "No error"
+                    returnValues["from"] = decodedResponse.from
+                    returnValues["to"] = decodedResponse.to
+                    returnValues["messages"] = decodedResponse.messages
+                    
+                    //return the values
+                    completion(returnValues)
+                } catch {
+                    print("Failed to decode MessagesResponse: \(error)")
+                    returnValues["error"] = "Error decoding JSON."
+                    completion(returnValues)
+                }
+        default:
+            print("Unknown action: \(String(describing: action))")
         }
     }
 
