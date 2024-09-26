@@ -59,13 +59,20 @@ struct SendMessageView: View {
 
             Button("Send") {
                 let params = ["recipient": recipient, "message": message, "action": "send_message"]
-                sendMessage(params: params){ returnValues in
+                // Reset success message before sending
+                
+                sendPOSTrequest(params: params){ returnValues in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
                         sendMessageStatus = returnValues["status"] as! Bool
                         sendMessageErrorMessage = returnValues["error"] as? String
                     }
                 }
+                
+            }
+            
+            if sendMessageStatus{
+                Text("Success!")
             }
         }
     }
@@ -88,7 +95,7 @@ struct KeysView: View {
             Button("View Public Key"){
                 let params = ["action": "get_public_key"]
                 
-                getPublicKey(params: params){ returnValues in
+                sendPOSTrequest(params: params){ returnValues in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
                         getPublicKeyStatus = returnValues["status"] as! Bool
@@ -112,7 +119,7 @@ struct KeysView: View {
             Button("Generate Keys"){
                 let params = ["action": "generate_keys"]
                 
-                generateKeys(params: params){ returnValues in
+                sendPOSTrequest(params: params){ returnValues in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
                         getPublicKeyStatus = returnValues["status"] as! Bool
@@ -125,7 +132,7 @@ struct KeysView: View {
             
             Button("Save Public Key"){
                 let params = ["public_key": publicKey, "action": "save_public_key"]
-                savePublicKey(params: params){ returnValues in
+                sendPOSTrequest(params: params){ returnValues in
                     // Update the state on the main thread
                     DispatchQueue.main.async {
                         getPublicKeyStatus = returnValues["status"] as! Bool
@@ -292,24 +299,18 @@ func processMessages(messages: [(from: String, to: String, message: String)]) ->
 // Define the function with a completion handler
 func sendPOSTrequest(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
     
-    //fetch parameters
-    let secretKey = params["secret_key"]
+    //determine action
     let action = params["action"]
+
+    //fetch parameters
+    let publicKey = params["public_key"]
+    let secretKey = params["secret_key"]
+    let message = params["message"]
+    let recipient = params["recipient"]
     
     //initialize return values and API endpoint
+    let endpoint = "inbox_ios.php"
     var returnValues : [String : Any] = ["status": false, "error": ""]
-    var endpoint = ""
-    
-    //initalize returnValues based on action
-    switch action{
-    case "get_messages":
-        endpoint = "inbox_ios.php"
-        returnValues["from"] = []
-        returnValues["to"] = []
-        returnValues["messages"] = []
-    default:
-        print("Unknown action: \(String(describing: action))")
-    }
     
     // Declare username as an optional
     var username: String?
@@ -343,8 +344,16 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
 
     // Create JSON data
     var json: [String: Any] = ["username": username!, "token": token!, "action": action!]
-    if action == "get_messages"{
-        json["secret_key"] = secretKey!
+    switch action{
+        case "get_messages":
+            json["secret_key"] = secretKey!
+        case "save_public_key":
+            json["public_key"] = publicKey!
+        case "send_message":
+            json["message"] = message!
+            json["recipient"] = recipient!
+        default:
+            print("Unknown action: \(String(describing: action))")
     }
     let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
@@ -367,29 +376,23 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
             return
         }
         
-        // Define the shape and type of the JSON response
-        struct MessagesResponse: Codable {
-            let status: String
-            let error: String?
-            let from: [String]
-            let to: [String]
-            let messages: [String]
-        }
-        
         let decoder = JSONDecoder()
         
         //decode the response based on the reponse type
         switch action {
         case "get_messages":
                 do {
+                    // Define the shape and type of the JSON response
+                    struct GetMessagesResponse: Codable {
+                        let status: String
+                        let error: String?
+                        let from: [String]
+                        let to: [String]
+                        let messages: [String]
+                    }
+                    
                     // Decode as MessagesResponse
-                    let decodedResponse = try decoder.decode(MessagesResponse.self, from: data)
-                    print("Messages Response:")
-                    print("Status: \(decodedResponse.status)")
-                    print("Error: ", decodedResponse.error ?? "No error")
-                    print("From: \(decodedResponse.from)")
-                    print("To: \(decodedResponse.to)")
-                    print("Messages: \(decodedResponse.messages)")
+                    let decodedResponse = try decoder.decode(GetMessagesResponse.self, from: data)
                     
                     //set return values based on JSON response
                     returnValues["status"] = decodedResponse.status == "success"
@@ -405,376 +408,117 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                     returnValues["error"] = "Error decoding JSON."
                     completion(returnValues)
                 }
+        case "get_public_key":
+            do {
+                // Define the shape and type of the JSON response
+                struct GetPublicKeyResponse: Codable {
+                    let status: String
+                    let error: String?
+                    let public_key: String
+                }
+                
+                // Decode as MessagesResponse
+                let decodedResponse = try decoder.decode(GetPublicKeyResponse.self, from: data)
+                print("Get public key response...")
+                print("Status: \(decodedResponse.status)")
+                print("Error: ", decodedResponse.error ?? "No error")
+                print("Public Key: \(decodedResponse.public_key)")
+                
+                //set return values based on JSON response
+                returnValues["status"] = decodedResponse.status == "success"
+                returnValues["error"] = decodedResponse.error ?? "No error"
+                returnValues["public_key"] = decodedResponse.public_key
+                
+                //return the values
+                completion(returnValues)
+            } catch {
+                print("Failed to decode PublicKeyResponse: \(error)")
+                returnValues["error"] = "Error decoding JSON."
+                completion(returnValues)
+            }
+        case "generate_keys":
+            do {
+                // Define the shape and type of the JSON response
+                struct GenerateKeysResponse: Codable {
+                    let status: String
+                    let error: String?
+                    let public_key: String
+                    let secret_key: String
+                }
+                
+                // Decode as MessagesResponse
+                let decodedResponse = try decoder.decode(GenerateKeysResponse.self, from: data)
+                print("Generate keys response...")
+                print("Status: \(decodedResponse.status)")
+                print("Error: ", decodedResponse.error ?? "No error")
+                print("Public Key: \(decodedResponse.public_key)")
+                print("Secret Key: \(decodedResponse.secret_key)")
+                
+                //set return values based on JSON response
+                returnValues["status"] = decodedResponse.status == "success"
+                returnValues["error"] = decodedResponse.error ?? "No error"
+                returnValues["public_key"] = decodedResponse.public_key
+                returnValues["secret_key"] = decodedResponse.secret_key
+                
+                //return the values
+                completion(returnValues)
+            } catch {
+                print("Failed to decode PublicKeyResponse: \(error)")
+                returnValues["error"] = "Error decoding JSON."
+                completion(returnValues)
+            }
+        case "save_public_key":
+            do {
+                // Define the shape and type of the JSON response
+                struct SavePublicKeyResponse: Codable {
+                    let status: String
+                    let error: String?
+                }
+                
+                // Decode as MessagesResponse
+                let decodedResponse = try decoder.decode(SavePublicKeyResponse.self, from: data)
+                print("Save public key response:")
+                print("Status: \(decodedResponse.status)")
+                print("Error: ", decodedResponse.error ?? "No error")
+                
+                //set return values based on JSON response
+                returnValues["status"] = decodedResponse.status == "success"
+                returnValues["error"] = decodedResponse.error ?? "No error"
+                
+                //return the values
+                completion(returnValues)
+            } catch {
+                print("Failed to decode PublicKeyResponse: \(error)")
+                returnValues["error"] = "Error decoding JSON."
+                completion(returnValues)
+            }
+        case "send_message":
+            do {
+                // Define the shape and type of the JSON response
+                struct SendMessageResponse: Codable {
+                    let status: String
+                    let error: String?
+                }
+                
+                // Decode as MessagesResponse
+                let decodedResponse = try decoder.decode(SendMessageResponse.self, from: data)
+                print("Send message response:")
+                print("Status: \(decodedResponse.status)")
+                print("Error: ", decodedResponse.error ?? "No error")
+                
+                //set return values based on JSON response
+                returnValues["status"] = decodedResponse.status == "success"
+                returnValues["error"] = decodedResponse.error ?? "No error"
+                
+                //return the values
+                completion(returnValues)
+            } catch {
+                print("Failed to decode PublicKeyResponse: \(error)")
+                returnValues["error"] = "Error decoding JSON."
+                completion(returnValues)
+            }
         default:
             print("Unknown action: \(String(describing: action))")
-        }
-    }
-
-    // Start the task
-    task.resume()
-}
-
-// Define the function with a completion handler
-func getPublicKey(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
-    
-    //action to send to API endpoint
-    let action = params["action"]
-    
-    //return values as associative array
-    var returnValues : [String: Any] = ["status": false, "error": "", "public_key": ""]
-    
-    // Declare username as an optional
-    var username: String?
-    var token: String?
-
-    if checkToken() {
-        // retrieve the username from UserDefaults
-        username = UserDefaults.standard.string(forKey: "username")
-        token = UserDefaults.standard.string(forKey: "token")
-        print("Username from UserDefaults: \(username!)")
-        print("Token from UserDefaults: \(token!)")
-    }
-    else{
-        print("Invalid or no token.")
-        returnValues["error"] = "Invalid or no token."
-        completion(returnValues)
-        return
-    }
-    
-    // Define the URL of the endpoint
-    guard let url = URL(string: "https://open-encrypt.com/inbox_ios.php") else {
-        fatalError("Invalid URL")
-    }
-
-    // Create the URLRequest object
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    
-    // Set the content type for JSON
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-    // Create JSON data
-    let json: [String: Any] = ["username": username!, "token": token!, "action": action!]
-    let jsonData = try? JSONSerialization.data(withJSONObject: json)
-
-    // Set HTTP body
-    request.httpBody = jsonData
-    
-    // Create a URLSession data task
-    let task = URLSession.shared.dataTask(with: request) { data, response, error in
-        if let error = error {
-            print("Error: \(error.localizedDescription)")
-            completion(returnValues)
-            return
-        }
-        
-        guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            print("Error: Invalid response or no data")
-            returnValues["error"] = "Error: Invalid response or no data"
-            completion(returnValues)
-            return
-        }
-        
-        // Define the shape and type of the JSON response
-        struct MessagesResponse: Codable {
-            let status: String
-            let error: String?
-            let public_key: String
-        }
-        
-        let decoder = JSONDecoder()
-        do {
-            let decodedResponse = try decoder.decode(MessagesResponse.self, from: data)
-            print("Status: ", decodedResponse.status)
-            print("Error: ", decodedResponse.error ?? "No error")
-            
-            //print the first message
-            print("Public Key:",decodedResponse.public_key)
-            
-            // Determine success
-            returnValues["success"] = decodedResponse.status == "success"
-            returnValues["error"] = decodedResponse.error
-            returnValues["public_key"] = decodedResponse.public_key
-            completion(returnValues)
-        } catch {
-            print("Error decoding JSON:", error)
-            returnValues["error"] = "Error decoding JSON"
-            completion(returnValues)
-        }
-    }
-
-    // Start the task
-    task.resume()
-}
-
-// Define the function with a completion handler
-func generateKeys(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
-    
-    let action = params["action"]
-    var returnValues : [String: Any] = ["status": false, "error": "", "public_key": "","secret_key": ""]
-    
-    // Declare username as an optional
-    var username: String?
-    var token: String?
-
-    if checkToken() {
-        // retrieve the username from UserDefaults
-        username = UserDefaults.standard.string(forKey: "username")
-        token = UserDefaults.standard.string(forKey: "token")
-        print("Username from UserDefaults: \(username!)")
-        print("Token from UserDefaults: \(token!)")
-    }
-    else{
-        print("Invalid or no token.")
-        returnValues["error"] = "Invalid or no token."
-        completion(returnValues)
-        return
-    }
-    
-    // Define the URL of the endpoint
-    guard let url = URL(string: "https://open-encrypt.com/inbox_ios.php") else {
-        fatalError("Invalid URL")
-    }
-
-    // Create the URLRequest object
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    
-    // Set the content type for JSON
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-    // Create JSON data
-    let json: [String: Any] = ["username": username!, "token": token!, "action": action!]
-    let jsonData = try? JSONSerialization.data(withJSONObject: json)
-
-    // Set HTTP body
-    request.httpBody = jsonData
-    
-    // Create a URLSession data task
-    let task = URLSession.shared.dataTask(with: request) { data, response, error in
-        if let error = error {
-            print("Error: \(error.localizedDescription)")
-            completion(returnValues)
-            return
-        }
-        
-        guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            print("Error: Invalid response or no data.")
-            returnValues["error"] = "Invalid response or no data."
-            completion(returnValues)
-            return
-        }
-        
-        // Define the shape and type of the JSON response
-        struct MessagesResponse: Codable {
-            let status: String
-            let error: String?
-            let public_key: String
-            let secret_key: String
-        }
-        
-        let decoder = JSONDecoder()
-        do {
-            let decodedResponse = try decoder.decode(MessagesResponse.self, from: data)
-            print("Status: ", decodedResponse.status)
-            print("Error: ", decodedResponse.error ?? "No error")
-            
-            // Determine success
-            returnValues["status"] = decodedResponse.status == "success"
-            returnValues["error"] = decodedResponse.error ?? "No error"
-            
-            //print the public and secret keys
-            print("Gen Public Key:",decodedResponse.public_key)
-            print("Gen Secret Key",decodedResponse.secret_key)
-            
-            returnValues["public_key"] = decodedResponse.public_key
-            returnValues["secret_key"] = decodedResponse.secret_key
-            
-            completion(returnValues)
-        } catch {
-            print("Error decoding JSON:", error)
-            returnValues["error"] = "Error decoding JSON."
-            completion(returnValues)
-        }
-    }
-
-    // Start the task
-    task.resume()
-}
-
-// Define the function with a completion handler
-func savePublicKey(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
-    
-    let publicKey = params["public_key"]
-    let action = params["action"]
-    
-    //return values
-    var returnValues : [String: Any] = ["status": false, "error": ""]
-    
-    // Declare username as an optional
-    var username: String?
-    var token: String?
-
-    if checkToken() {
-        // retrieve the username from UserDefaults
-        username = UserDefaults.standard.string(forKey: "username")
-        token = UserDefaults.standard.string(forKey: "token")
-        print("Username from UserDefaults: \(username!)")
-        print("Token from UserDefaults: \(token!)")
-    }
-    else{
-        print("Invalid or no token.")
-        returnValues["error"] = "Invalid or no token."
-        completion(returnValues)
-        return
-    }
-    
-    // Define the URL of the endpoint
-    guard let url = URL(string: "https://open-encrypt.com/inbox_ios.php") else {
-        fatalError("Invalid URL")
-    }
-
-    // Create the URLRequest object
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    
-    // Set the content type for JSON
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-    // Create JSON data
-    let json: [String: Any] = ["username": username!, "token": token!, "action": action!, "public_key": publicKey!]
-    let jsonData = try? JSONSerialization.data(withJSONObject: json)
-
-    // Set HTTP body
-    request.httpBody = jsonData
-    
-    // Create a URLSession data task
-    let task = URLSession.shared.dataTask(with: request) { data, response, error in
-        if let error = error {
-            print("Error: \(error.localizedDescription)")
-            returnValues["error"] = error.localizedDescription
-            completion(returnValues)
-            return
-        }
-        
-        guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            print("Error: Invalid response or no data.")
-            returnValues["error"] = "Invalid response or no data."
-            completion(returnValues)
-            return
-        }
-        
-        // Define the shape and type of the JSON response
-        struct SavePublicKeyResponse: Codable {
-            let status: String
-            let error: String?
-        }
-        
-        let decoder = JSONDecoder()
-        do {
-            let decodedResponse = try decoder.decode(SavePublicKeyResponse.self, from: data)
-            print("Status: ", decodedResponse.status)
-            print("Error: ", decodedResponse.error ?? "No error")
-            
-            
-            // Determine success
-            returnValues["status"] = decodedResponse.status == "success"
-            returnValues["error"] = decodedResponse.error
-            completion(returnValues)
-        } catch {
-            print("Error decoding JSON:", error)
-            returnValues["error"] = "Error decoding JSON."
-            completion(returnValues)
-        }
-    }
-
-    // Start the task
-    task.resume()
-}
-
-// Define the function with a completion handler
-func sendMessage(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
-    
-    //get parameters
-    let message = params["message"]
-    let recipient = params["recipient"]
-    let action = params["action"]
-    
-    //initialize returnValues
-    var returnValues: [String: Any] = ["status": false, "error": ""]
-    
-    // Declare username as an optional
-    var username: String?
-    var token: String?
-
-    if checkToken() {
-        // retrieve the username from UserDefaults
-        username = UserDefaults.standard.string(forKey: "username")
-        token = UserDefaults.standard.string(forKey: "token")
-        print("Username from UserDefaults: \(username!)")
-        print("Token from UserDefaults: \(token!)")
-    }
-    else{
-        print("Invalid or no token.")
-        returnValues["error"] = "Invalid or no token."
-        completion(returnValues)
-        return
-    }
-    
-    // Define the URL of the endpoint
-    guard let url = URL(string: "https://open-encrypt.com/inbox_ios.php") else {
-        fatalError("Invalid URL")
-    }
-
-    // Create the URLRequest object
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    
-    // Set the content type for JSON
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-    // Create JSON data
-    let json: [String: Any] = ["username": username!, "token": token!, "action": action!,"message": message!, "recipient": recipient!]
-    let jsonData = try? JSONSerialization.data(withJSONObject: json)
-
-    // Set HTTP body
-    request.httpBody = jsonData
-    
-    // Create a URLSession data task
-    let task = URLSession.shared.dataTask(with: request) { data, response, error in
-        if let error = error {
-            print("Error: \(error.localizedDescription)")
-            returnValues["error"] = error.localizedDescription
-            completion(returnValues)
-            return
-        }
-        
-        guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            print("Error: Invalid response or no data.")
-            returnValues["error"] = "Error: Invalid response or no data."
-            completion(returnValues)
-            return
-        }
-        
-        // Define the shape and type of the JSON response
-        struct MessagesResponse: Codable {
-            let status: String
-            let error: String?
-        }
-        
-        let decoder = JSONDecoder()
-        do {
-            let decodedResponse = try decoder.decode(MessagesResponse.self, from: data)
-            print("Status: ", decodedResponse.status)
-            print("Error: ", decodedResponse.error ?? "No error")
-            
-            // Determine success
-            returnValues["success"] = decodedResponse.status == "success"
-            returnValues["error"] = decodedResponse.error
-            completion(returnValues)
-        } catch {
-            print("Error decoding JSON:", error)
-            completion(returnValues)
         }
     }
 
