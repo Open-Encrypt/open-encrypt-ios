@@ -119,13 +119,18 @@ struct KeysView: View {
             Button("Generate Keys"){
                 let params = ["action": "generate_keys"]
                 
-                sendPOSTrequest(params: params){ returnValues in
-                    // Update the state on the main thread
+                sendPOSTrequest(params: params) { returnValues in
+
                     DispatchQueue.main.async {
-                        getPublicKeyStatus = returnValues["status"] as! Bool
+                        // don't force unwrap anything — this avoids the crash
+                        let ok = (returnValues["status"] as? Bool)
+                              ?? ((returnValues["status"] as? String) == "success")
+                        
+                        getPublicKeyStatus = ok
                         getPublicKeyErrorMessage = returnValues["error"] as? String
-                        publicKey = returnValues["public_key"] as! String
-                        secretKey = returnValues["secret_key"] as! String
+                        
+                        publicKey = returnValues["public_key"] as? String ?? ""
+                        secretKey = returnValues["secret_key"] as? String ?? ""
                     }
                 }
             }
@@ -169,7 +174,7 @@ struct KeysView: View {
                 Text(publicKey)
                     .padding()
             } else if let error = getPublicKeyErrorMessage {
-                Text("Error: \(error)")
+                Text("Display Public Key Error: \(error)")
                     .foregroundColor(.red)
                     .padding()
             }
@@ -363,7 +368,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
     // Create a URLSession data task
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
-            print("Error: \(error.localizedDescription)")
+            print("Error during task: \(error.localizedDescription)")
             returnValues["error"] = error.localizedDescription
             completion(returnValues)
             return
@@ -421,7 +426,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                 let decodedResponse = try decoder.decode(GetPublicKeyResponse.self, from: data)
                 print("Get public key response...")
                 print("Status: \(decodedResponse.status)")
-                print("Error: ", decodedResponse.error ?? "No error")
+                print("Get Public Key Error: ", decodedResponse.error ?? "No error")
                 print("Public Key: \(decodedResponse.public_key)")
                 
                 //set return values based on JSON response
@@ -450,7 +455,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                 let decodedResponse = try decoder.decode(GenerateKeysResponse.self, from: data)
                 print("Generate keys response...")
                 print("Status: \(decodedResponse.status)")
-                print("Error: ", decodedResponse.error ?? "No error")
+                print("Key Generation Error: ", decodedResponse.error ?? "No error")
                 print("Public Key: \(decodedResponse.public_key)")
                 print("Secret Key: \(decodedResponse.secret_key)")
                 
@@ -479,7 +484,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                 let decodedResponse = try decoder.decode(SavePublicKeyResponse.self, from: data)
                 print("Save public key response:")
                 print("Status: \(decodedResponse.status)")
-                print("Error: ", decodedResponse.error ?? "No error")
+                print("Save Public Key Error: ", decodedResponse.error ?? "No error")
                 
                 //set return values based on JSON response
                 returnValues["status"] = decodedResponse.status == "success"
@@ -504,7 +509,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                 let decodedResponse = try decoder.decode(SendMessageResponse.self, from: data)
                 print("Send message response:")
                 print("Status: \(decodedResponse.status)")
-                print("Error: ", decodedResponse.error ?? "No error")
+                print("Send Message Error: ", decodedResponse.error ?? "No error")
                 
                 //set return values based on JSON response
                 returnValues["status"] = decodedResponse.status == "success"
