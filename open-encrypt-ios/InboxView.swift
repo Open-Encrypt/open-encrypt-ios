@@ -469,7 +469,20 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                 completion(returnValues)
             } catch {
                 print("Failed to decode PublicKeyResponse: \(error)")
-                returnValues["error"] = "Error decoding JSON."
+                
+                if let raw = String(data: data, encoding: .utf8) {
+                    print("===== RAW RESPONSE FROM SERVER =====")
+                    print(raw)
+                    print("====================================")
+                    // Temporarily store it for debugging:
+                    returnValues["raw_response"] = raw
+                } else {
+                    print("Could not decode data as UTF-8 string")
+                    returnValues["raw_response"] = "<Could not decode UTF-8>"
+                }
+
+                
+                returnValues["error"] = "Error decoding JSON response during sendPOSTrequest for generate_keys."
                 completion(returnValues)
             }
         case "save_public_key":
