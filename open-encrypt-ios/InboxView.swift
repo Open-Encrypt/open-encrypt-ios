@@ -357,8 +357,11 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
         case "send_message":
             json["message"] = message!
             json["recipient"] = recipient!
+        case "generate_keys":
+            break //nothing to send
         default:
-            print("Unknown action: \(String(describing: action))")
+            print("sendPOSTrequest: Unrecognized action '\(action ?? "nil")' — no matching case in switch statement.")
+
     }
     let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
