@@ -160,24 +160,37 @@ struct KeysView: View {
                 }
             }
             
-            // TextField for username input
-            TextField("Secret key:", text: $secretKey)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+            // Scrollable, editable text area for secret key
+            TextEditor(text: $secretKey)
+                .frame(height: 150)  // adjust to taste
+                .border(Color.gray.opacity(0.5), width: 1)
                 .padding()
                 .autocapitalization(.none)
+                .disableAutocorrection(true)
+
             
             // Display the retrieved public key
             if !publicKey.isEmpty {
                 Text("Public Key:")
                     .font(.subheadline)
                     .padding(.top)
-                Text(publicKey)
-                    .padding()
+                
+                ScrollView {
+                    Text(publicKey)
+                        .textSelection(.enabled) // allows copy
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(height: 150) // adjust height as needed
+                .border(Color.gray.opacity(0.5), width: 1)
+                .padding(.bottom)
+                
             } else if let error = getPublicKeyErrorMessage {
                 Text("Display Public Key Error: \(error)")
                     .foregroundColor(.red)
                     .padding()
             }
+
         }
     }
 }
@@ -358,7 +371,9 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
             json["message"] = message!
             json["recipient"] = recipient!
         case "generate_keys":
-            break //nothing to send
+            break // nothing to send
+        case "get_public_key":
+            break // nothing to send
         default:
             print("sendPOSTrequest: Unrecognized action '\(action ?? "nil")' — no matching case in switch statement.")
 
