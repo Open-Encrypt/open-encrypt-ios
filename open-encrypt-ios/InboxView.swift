@@ -92,15 +92,20 @@ struct KeysView: View {
                 .font(.headline)
                 .padding()
             
-            Button("View Public Key"){
+            Button("View Public Key") {
                 let params = ["action": "get_public_key"]
                 
-                sendPOSTrequest(params: params){ returnValues in
-                    // Update the state on the main thread
+                sendPOSTrequest(params: params) { returnValues in
                     DispatchQueue.main.async {
-                        getPublicKeyStatus = returnValues["status"] as! Bool
+                        let ok = (returnValues["status"] as? Bool)
+                              ?? ((returnValues["status"] as? String) == "success")
+                        
+                        getPublicKeyStatus = ok
                         getPublicKeyErrorMessage = returnValues["error"] as? String
-                        publicKey = returnValues["public_key"] as! String
+                        publicKey = returnValues["public_key"] as? String ?? ""
+                        
+                        print("getPublicKeyErrorMessage:",getPublicKeyErrorMessage!)
+                        print("publicKey.count:", publicKey.count)
                     }
                 }
             }
@@ -109,7 +114,8 @@ struct KeysView: View {
                 let username = UserDefaults.standard.string(forKey: "username")
                 if let retrievedKey = retrieveSecretKey(username: username!) {
                     secretKey = retrievedKey
-                    print("Retrieved secret key: \(secretKey)")
+                    print("Retrieved secret key prefix: \(secretKey.prefix(30))")
+                    print("publicKey.count:", secretKey.count)
                 } else {
                     print("Failed to retrieve secret key")
                 }
@@ -122,7 +128,6 @@ struct KeysView: View {
                 sendPOSTrequest(params: params) { returnValues in
 
                     DispatchQueue.main.async {
-                        // don't force unwrap anything — this avoids the crash
                         let ok = (returnValues["status"] as? Bool)
                               ?? ((returnValues["status"] as? String) == "success")
                         
@@ -160,36 +165,55 @@ struct KeysView: View {
                 }
             }
             
-            // Scrollable, editable text area for secret key
-            TextEditor(text: $secretKey)
-                .frame(height: 150)  // adjust to taste
-                .border(Color.gray.opacity(0.5), width: 1)
-                .padding()
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
-
-            
-            // Display the retrieved public key
-            if !publicKey.isEmpty {
-                Text("Public Key:")
-                    .font(.subheadline)
-                    .padding(.top)
-                
-                ScrollView {
-                    Text(publicKey)
-                        .textSelection(.enabled) // allows copy
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
+            // Scrollable view for secret key
+            if !secretKey.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Secret Key:")
+                        .font(.subheadline)
+                    
+                    ScrollView {
+                        Text(secretKey)
+                            .textSelection(.enabled) // allows copy
+                            .padding(6)
+                            .frame(alignment: .leading) // natural width, aligned left
+                    }
+                    .frame(height: 100) // adjust height as needed
+                    .border(Color.gray.opacity(0.5), width: 1)
+                    .padding(.horizontal) // space from screen edges
                 }
-                .frame(height: 150) // adjust height as needed
-                .border(Color.gray.opacity(0.5), width: 1)
                 .padding(.bottom)
-                
+            }
+
+            // Scrollable view for public key
+            if !publicKey.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Public Key:")
+                        .font(.subheadline)
+                    
+                    ScrollView {
+                        Text(publicKey)
+                            .textSelection(.enabled) // allows copy
+                            .padding(6)
+                            .frame(alignment: .leading) // natural width
+                    }
+                    .frame(height: 100) // adjust height
+                    .border(Color.gray.opacity(0.5), width: 1)
+                    .padding(.horizontal)
+                }
+                .padding(.bottom)
             } else if let error = getPublicKeyErrorMessage {
                 Text("Display Public Key Error: \(error)")
                     .foregroundColor(.red)
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.bottom)
+            } else {
+                Text("No public key yet.")
+                    .foregroundColor(.gray)
+                    .padding(.horizontal)
+                    .padding(.bottom)
             }
+
+
 
         }
     }
@@ -445,7 +469,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                 print("Get public key response...")
                 print("Status: \(decodedResponse.status)")
                 print("Get Public Key Error: ", decodedResponse.error ?? "No error")
-                print("Public Key: \(decodedResponse.public_key)")
+                print("Public Key Prefix: \(decodedResponse.public_key.prefix(30))")
                 
                 //set return values based on JSON response
                 returnValues["status"] = decodedResponse.status == "success"
@@ -474,8 +498,8 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                 print("Generate keys response...")
                 print("Status: \(decodedResponse.status)")
                 print("Key Generation Error: ", decodedResponse.error ?? "No error")
-                print("Public Key: \(decodedResponse.public_key)")
-                print("Secret Key: \(decodedResponse.secret_key)")
+                print("Public Key prefix: \(decodedResponse.public_key.prefix(30))...")
+                print("Secret Key prefix: \(decodedResponse.secret_key.prefix(30))...")
                 
                 //set return values based on JSON response
                 returnValues["status"] = decodedResponse.status == "success"
@@ -487,19 +511,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                 completion(returnValues)
             } catch {
                 print("Failed to decode PublicKeyResponse: \(error)")
-                
-                if let raw = String(data: data, encoding: .utf8) {
-                    print("===== RAW RESPONSE FROM SERVER =====")
-                    print(raw)
-                    print("====================================")
-                    // Temporarily store it for debugging:
-                    returnValues["raw_response"] = raw
-                } else {
-                    print("Could not decode data as UTF-8 string")
-                    returnValues["raw_response"] = "<Could not decode UTF-8>"
-                }
 
-                
                 returnValues["error"] = "Error decoding JSON response during sendPOSTrequest for generate_keys."
                 completion(returnValues)
             }
