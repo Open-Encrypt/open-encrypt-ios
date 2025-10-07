@@ -103,8 +103,9 @@ struct KeysView: View {
                         getPublicKeyStatus = ok
                         getPublicKeyErrorMessage = returnValues["error"] as? String
                         publicKey = returnValues["public_key"] as? String ?? ""
+                        secretKey = ""
                         
-                        print("getPublicKeyErrorMessage:",getPublicKeyErrorMessage!)
+                        print("getPublicKeyErrorMessage:",getPublicKeyErrorMessage ?? "nil")
                         print("publicKey.count:", publicKey.count)
                     }
                 }
@@ -114,6 +115,7 @@ struct KeysView: View {
                 let username = UserDefaults.standard.string(forKey: "username")
                 if let retrievedKey = retrieveSecretKey(username: username!) {
                     secretKey = retrievedKey
+                    publicKey = ""
                     print("Retrieved secret key prefix: \(secretKey.prefix(30))")
                     print("publicKey.count:", secretKey.count)
                 } else {
@@ -141,13 +143,18 @@ struct KeysView: View {
             }
             
             Button("Save Public Key"){
-                let params = ["public_key": publicKey, "action": "save_public_key"]
-                sendPOSTrequest(params: params){ returnValues in
-                    // Update the state on the main thread
-                    DispatchQueue.main.async {
-                        getPublicKeyStatus = returnValues["status"] as! Bool
-                        getPublicKeyErrorMessage = returnValues["error"] as? String
+                if !publicKey.isEmpty{
+                    let params = ["public_key": publicKey, "action": "save_public_key"]
+                    sendPOSTrequest(params: params){ returnValues in
+                        // Update the state on the main thread
+                        DispatchQueue.main.async {
+                            getPublicKeyStatus = returnValues["status"] as! Bool
+                            getPublicKeyErrorMessage = returnValues["error"] as? String
+                        }
                     }
+                }
+                else {
+                    print("No public key to save. Public key must be generated.")
                 }
             }
             
@@ -189,31 +196,23 @@ struct KeysView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Public Key:")
                         .font(.subheadline)
-                    
                     ScrollView {
                         Text(publicKey)
-                            .textSelection(.enabled) // allows copy
+                            .textSelection(.enabled)
                             .padding(6)
-                            .frame(alignment: .leading) // natural width
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .frame(height: 100) // adjust height
                     .border(Color.gray.opacity(0.5), width: 1)
                     .padding(.horizontal)
                 }
                 .padding(.bottom)
-            } else if let error = getPublicKeyErrorMessage {
+            } else if let error = getPublicKeyErrorMessage, !error.isEmpty, error != "No error" {
                 Text("Display Public Key Error: \(error)")
                     .foregroundColor(.red)
                     .padding(.horizontal)
                     .padding(.bottom)
-            } else {
-                Text("No public key yet.")
-                    .foregroundColor(.gray)
-                    .padding(.horizontal)
-                    .padding(.bottom)
             }
-
-
 
         }
     }
