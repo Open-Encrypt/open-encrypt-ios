@@ -244,7 +244,9 @@ struct InboxMessagesView: View {
                     
                 }
                 
-                Button("Get Messages"){
+                Button("Get Messages") {
+                    // Clear previous messages before loading new ones
+                    messageList.removeAll()
                     
                     let username = UserDefaults.standard.string(forKey: "username")
                     if let retrievedKey = retrieveSecretKey(username: username!) {
@@ -256,27 +258,23 @@ struct InboxMessagesView: View {
                     
                     let params = ["secret_key": secretKey, "action": "get_messages"]
                     
-                    sendPOSTrequest(params: params){ returnValues in
-                        // Update the state on the main thread
+                    sendPOSTrequest(params: params) { returnValues in
                         DispatchQueue.main.async {
                             getMessagesStatus = returnValues["status"] as! Bool
                             getMessagesErrorMessage = returnValues["error"] as? String
                             
-                            //retrieve from, to, messages from response
+                            // Retrieve from, to, messages from response
                             let from = returnValues["from"] as! [String]
                             let to = returnValues["to"] as! [String]
                             let messages = returnValues["messages"] as! [String]
                             
-                            //zip from, to, messages into single list
-                            for i in 0..<from.count {
-                                let tuple = (from[i], to[i], messages[i])
-                                messageList.append(tuple)
-                            }
-
+                            // Zip and reverse the message list so newest appear first
+                            let combined = zip(zip(from, to), messages).map { ($0.0, $0.1, $1) }
+                            messageList = combined.reversed()
                         }
                     }
                 }
-                
+                // place messages in a List view with (from,to,message) data arranged
                 processMessages(messages: messageList)
                 
             }
