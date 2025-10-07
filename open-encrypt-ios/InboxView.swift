@@ -41,44 +41,65 @@ struct SendMessageView: View {
                 .font(.headline)
                 .padding()
             
-            // TextField for username input
             TextField("To:", text: $recipient)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
                 .autocapitalization(.none)
             
-            // TextField for username input
             TextEditor(text: $message)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-                .autocapitalization(.none)
-                .background(Color.white) // Background color
-                .border(Color.gray, width: 1) // Simple border
-                .frame(width: 300, height: 150) // Fixed width and height
-            //button to send message
-
+                .padding(8)
+                .background(Color.white)
+                .border(Color.gray.opacity(0.5), width: 1)
+                .cornerRadius(8)
+                .frame(width: 300, height: 150)
+            
             Button("Send") {
-                let params = ["recipient": recipient, "message": message, "action": "send_message"]
-                // Reset success message before sending
+                let params = [
+                    "recipient": recipient,
+                    "message": message,
+                    "action": "send_message"
+                ]
                 
-                sendPOSTrequest(params: params){ returnValues in
-                    // Update the state on the main thread
+                sendPOSTrequest(params: params) { returnValues in
                     DispatchQueue.main.async {
-                        sendMessageStatus = returnValues["status"] as! Bool
-                        sendMessageErrorMessage = returnValues["error"] as? String
+                        let status = returnValues["status"] as? Bool ?? false
+                        let error = returnValues["error"] as? String
+                        
+                        sendMessageStatus = status
+                        sendMessageErrorMessage = error
+                        
+                        if status {
+                            message = ""  // clear message text
+                            
+                            // Clear success message after 2 seconds
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                sendMessageStatus = false
+                            }
+                        }
                     }
                 }
-                
+            }
+            .buttonStyle(.borderedProminent)
+            .padding()
+            
+            // Success message
+            if sendMessageStatus {
+                Text("Success!")
+                    .foregroundColor(.green)
+                    .padding(.top, 4)
             }
             
-            if sendMessageStatus{
-                Text("Success!")
+            // Error message
+            if let error = sendMessageErrorMessage,
+               !error.isEmpty,
+               error.lowercased() != "no error" {
+                Text("Error: \(error)")
+                    .foregroundColor(.red)
+                    .padding(.top, 4)
             }
         }
     }
 }
- 
-
 
 struct KeysView: View {
     @State private var getPublicKeyStatus: Bool = false
