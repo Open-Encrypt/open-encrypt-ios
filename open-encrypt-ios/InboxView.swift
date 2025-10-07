@@ -52,6 +52,7 @@ struct SendMessageView: View {
                 .border(Color.gray.opacity(0.5), width: 1)
                 .cornerRadius(8)
                 .frame(width: 300, height: 150)
+                .autocapitalization(.none)
             
             Button("Send") {
                 let params = [
@@ -69,10 +70,12 @@ struct SendMessageView: View {
                         sendMessageErrorMessage = error
                         
                         if status {
-                            message = ""  // clear message text
+                            // Clear both fields on success
+                            recipient = ""
+                            message = ""
                             
-                            // Clear success message after 2 seconds
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            // Clear success message after 3 seconds
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                                 sendMessageStatus = false
                             }
                         }
@@ -84,8 +87,8 @@ struct SendMessageView: View {
             
             // Success message
             if sendMessageStatus {
-                Text("Success!")
-                    .foregroundColor(.green)
+                Text("Message sent successfully.")
+                    .foregroundColor(.black)
                     .padding(.top, 4)
             }
             
@@ -100,6 +103,7 @@ struct SendMessageView: View {
         }
     }
 }
+
 
 struct KeysView: View {
     @State private var getPublicKeyStatus: Bool = false
