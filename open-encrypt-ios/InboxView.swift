@@ -142,7 +142,7 @@ struct KeysView: View {
                 }
             }
             
-            Button("Save Public Key"){
+            Button("Save Public Key (remote)"){
                 if !publicKey.isEmpty{
                     let params = ["public_key": publicKey, "action": "save_public_key"]
                     sendPOSTrequest(params: params){ returnValues in
@@ -158,7 +158,7 @@ struct KeysView: View {
                 }
             }
             
-            Button("Save Secret Key") {
+            Button("Save Secret Key (local)") {
                 if let username = UserDefaults.standard.string(forKey: "username") {
                     let storeStatus = storeSecretKey(secretKey: secretKey, username: username)
 
@@ -249,7 +249,7 @@ struct InboxMessagesView: View {
                     let username = UserDefaults.standard.string(forKey: "username")
                     if let retrievedKey = retrieveSecretKey(username: username!) {
                         secretKey = retrievedKey
-                        print("Retrieved secret key: \(secretKey)")
+                        print("Retrieved secret key prefix: \(secretKey.prefix(30))")
                     } else {
                         print("Failed to retrieve secret key")
                     }
