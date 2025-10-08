@@ -250,7 +250,8 @@ struct InboxMessagesView: View {
     @State private var secretKey: String = ""
     @State private var getMessagesStatus: Bool = false
     @State private var getMessagesErrorMessage: String? = ""
-    @State private var messageList: [(String,String,String)] = []
+    @State private var messageList: [(from: String, to: String, message: String, timestamp: String)] = []
+
     @Environment(\.dismiss) private var dismiss
         
     var body: some View {
@@ -292,9 +293,11 @@ struct InboxMessagesView: View {
                             let from = returnValues["from"] as! [String]
                             let to = returnValues["to"] as! [String]
                             let messages = returnValues["messages"] as! [String]
+                            let timestamps = returnValues["timestamps"] as! [String]
                             
                             // Zip and reverse the message list so newest appear first
-                            let combined = zip(zip(from, to), messages).map { ($0.0, $0.1, $1) }
+                            let combined = zip(zip(zip(from, to), messages), timestamps)
+                                .map { ($0.0.0.0, $0.0.0.1, $0.0.1, $0.1) }
                             messageList = combined.reversed()
                         }
                     }
@@ -345,20 +348,31 @@ func retrieveSecretKey(username: String) -> String? {
 
 
 // Define the function with named tuple elements
-func processMessages(messages: [(from: String, to: String, message: String)]) -> some View {
-    List(messages, id: \.message) { messageData in
+func processMessages(messages: [(from: String, to: String, message: String, timestamp: String)]) -> some View {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss" // match your PHP timestamp format
+    formatter.timeStyle = .short
+    formatter.dateStyle = .short
+
+    return List(messages, id: \.message) { messageData in
         VStack(alignment: .leading) {
             Text("From: \(messageData.from)")
                 .font(.headline)
             Text("To: \(messageData.to)")
                 .font(.subheadline)
+            
+            if let date = formatter.date(from: messageData.timestamp) {
+                Text("Sent: \(formatter.string(from: date))")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            
             Text(messageData.message)
                 .font(.body)
         }
         .padding()
     }
 }
-
 
 // Define the function with a completion handler
 func sendPOSTrequest(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
@@ -458,6 +472,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                         let from: [String]
                         let to: [String]
                         let messages: [String]
+                        let timestamps: [String]
                     }
                     
                     // Decode as MessagesResponse
@@ -469,6 +484,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                     returnValues["from"] = decodedResponse.from
                     returnValues["to"] = decodedResponse.to
                     returnValues["messages"] = decodedResponse.messages
+                    returnValues["timestamps"] = decodedResponse.timestamps
                     
                     //return the values
                     completion(returnValues)
