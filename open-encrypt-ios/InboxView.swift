@@ -215,51 +215,73 @@ struct KeysView: View {
                 }
             }
             
-            // Scrollable view for secret key
-            if !secretKey.isEmpty {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Secret Key:")
-                        .font(.subheadline)
+            // Full key view using TextEditor
+            if !secretKey.isEmpty || !publicKey.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    if !secretKey.isEmpty {
+                        Text("Secret Key:")
+                            .font(.subheadline)
+                            .padding(.horizontal)
+                        
+                        TextEditor(text: $secretKey)
+                            .frame(height: 100) // adjust as needed
+                            .border(Color.gray.opacity(0.5), width: 1)
+                            .padding(.horizontal)
+                            .textSelection(.enabled) // allows copying
+                        
+                        HStack {
+                            Button("Copy Secret Key") {
+                                UIPasteboard.general.string = secretKey
+                            }
+                            Button("Save Secret Key (file)") {
+                                saveKeyToFile(key: secretKey, filename: "secret_key.txt")
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
                     
-                    ScrollView {
-                        Text(secretKey)
-                            .textSelection(.enabled) // allows copy
-                            .padding(6)
-                            .frame(alignment: .leading) // natural width, aligned left
-                    }
-                    .frame(height: 100) // adjust height as needed
-                    .border(Color.gray.opacity(0.5), width: 1)
-                    .padding(.horizontal) // space from screen edges
-                }
-                .padding(.bottom)
-            }
-
-            // Scrollable view for public key
-            if !publicKey.isEmpty {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Public Key:")
-                        .font(.subheadline)
-                    ScrollView {
-                        Text(publicKey)
+                    if !publicKey.isEmpty {
+                        Text("Public Key:")
+                            .font(.subheadline)
+                            .padding(.horizontal)
+                        
+                        TextEditor(text: $publicKey)
+                            .frame(height: 100)
+                            .border(Color.gray.opacity(0.5), width: 1)
+                            .padding(.horizontal)
                             .textSelection(.enabled)
-                            .padding(6)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        HStack {
+                            Button("Copy Public Key") {
+                                UIPasteboard.general.string = publicKey
+                            }
+                            Button("Save Public Key (file)") {
+                                saveKeyToFile(key: publicKey, filename: "public_key.txt")
+                            }
+                        }
+                        .padding(.horizontal)
                     }
-                    .frame(height: 100) // adjust height
-                    .border(Color.gray.opacity(0.5), width: 1)
-                    .padding(.horizontal)
                 }
-                .padding(.bottom)
-            } else if let error = getPublicKeyErrorMessage, !error.isEmpty, error != "No error" {
-                Text("Display Public Key Error: \(error)")
-                    .foregroundColor(.red)
-                    .padding(.horizontal)
-                    .padding(.bottom)
             }
 
         }
     }
 }
+
+func saveKeyToFile(key: String, filename: String) {
+    let fileManager = FileManager.default
+    let urls = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
+    if let documentsURL = urls.first {
+        let fileURL = documentsURL.appendingPathComponent(filename)
+        do {
+            try key.write(to: fileURL, atomically: true, encoding: .utf8)
+            print("\(filename) saved to \(fileURL)")
+        } catch {
+            print("Failed to save \(filename): \(error)")
+        }
+    }
+}
+
 
     
     
@@ -300,7 +322,9 @@ struct InboxMessagesView: View {
                         print("Failed to retrieve secret key")
                     }
                     
-                    let params = ["secret_key": secretKey, "action": "get_messages"]
+                    let params = ["secret_key": secretKey,
+                                  "action": "get_messages"
+                    ]
                     
                     sendPOSTrequest(params: params) { returnValues in
                         DispatchQueue.main.async {
