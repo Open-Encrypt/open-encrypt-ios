@@ -349,10 +349,16 @@ func retrieveSecretKey(username: String) -> String? {
 
 // Define the function with named tuple elements
 func processMessages(messages: [(from: String, to: String, message: String, timestamp: String)]) -> some View {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss" // match your PHP timestamp format
-    formatter.timeStyle = .short
-    formatter.dateStyle = .short
+    // Formatter for parsing the server timestamp (assumed UTC)
+    let parseFormatter = DateFormatter()
+    parseFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+    parseFormatter.timeZone = TimeZone(abbreviation: "UTC")
+
+    // Formatter for displaying in New York time
+    let displayFormatter = DateFormatter()
+    displayFormatter.dateStyle = .short
+    displayFormatter.timeStyle = .short
+    displayFormatter.timeZone = TimeZone(identifier: "America/New_York") // set to EST
 
     return List(messages, id: \.message) { messageData in
         VStack(alignment: .leading) {
@@ -361,8 +367,8 @@ func processMessages(messages: [(from: String, to: String, message: String, time
             Text("To: \(messageData.to)")
                 .font(.subheadline)
             
-            if let date = formatter.date(from: messageData.timestamp) {
-                Text("Sent: \(formatter.string(from: date))")
+            if let date = parseFormatter.date(from: messageData.timestamp) {
+                Text("Sent: \(displayFormatter.string(from: date))")
                     .font(.caption)
                     .foregroundColor(.gray)
             }
@@ -373,6 +379,8 @@ func processMessages(messages: [(from: String, to: String, message: String, time
         .padding()
     }
 }
+
+
 
 // Define the function with a completion handler
 func sendPOSTrequest(params: [String: String], completion: @escaping ([String: Any]) -> Void) {
