@@ -89,10 +89,10 @@ func accountRequest(params: [String: String], completion: @escaping (Bool, Strin
     
     var endpoint = ""
     if action == "login" {
-        endpoint = "login_ios.php"
+        endpoint = "api/login_ios.php"
     }
     if action == "create_account" {
-        endpoint = "create_account_ios.php"
+        endpoint = "api/create_account_ios.php"
     }
     
     // Define the URL of the endpoint
