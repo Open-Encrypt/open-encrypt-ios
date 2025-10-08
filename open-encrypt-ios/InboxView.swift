@@ -110,12 +110,24 @@ struct KeysView: View {
     @State private var getPublicKeyErrorMessage: String? = ""
     @State private var publicKey: String = ""
     @State private var secretKey: String = ""
+    @State private var selectedEncryptionMethod: String = "ring_lwe" // default
+    
+    let encryptionOptions = ["ring_lwe", "module_lwe"]
     
     var body: some View {
         VStack {
             Text("Public/Secret Keys")
                 .font(.headline)
                 .padding()
+            
+            // Picker for encryption method
+            Picker("Encryption Method", selection: $selectedEncryptionMethod) {
+                ForEach(encryptionOptions, id: \.self) { method in
+                    Text(method).tag(method)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding()
             
             Button("View Public Key") {
                 let params = ["action": "get_public_key"]
@@ -150,7 +162,10 @@ struct KeysView: View {
             }
             
             Button("Generate Keys"){
-                let params = ["action": "generate_keys"]
+                let params = [
+                    "action": "generate_keys",
+                    "encryption_method": selectedEncryptionMethod
+                ]
                 
                 sendPOSTrequest(params: params) { returnValues in
 
@@ -169,7 +184,10 @@ struct KeysView: View {
             
             Button("Save Public Key (remote)"){
                 if !publicKey.isEmpty{
-                    let params = ["public_key": publicKey, "action": "save_public_key", "encryption_method": "ring_lwe"]
+                    let params = ["public_key": publicKey,
+                                  "action": "save_public_key",
+                                  "encryption_method": selectedEncryptionMethod
+                    ]
                     sendPOSTrequest(params: params){ returnValues in
                         // Update the state on the main thread
                         DispatchQueue.main.async {
@@ -441,7 +459,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
             json["message"] = message!
             json["recipient"] = recipient!
         case "generate_keys":
-            break // nothing to send
+            json["encryption_method"] = encryptionMethod!
         case "get_public_key":
             break // nothing to send
         default:
@@ -518,6 +536,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                 print("Status: \(decodedResponse.status)")
                 print("Get Public Key Error: ", decodedResponse.error ?? "No error")
                 print("Public Key Prefix: \(decodedResponse.public_key.prefix(30))")
+                print("Public Key Count:", decodedResponse.public_key.count)
                 
                 //set return values based on JSON response
                 returnValues["status"] = decodedResponse.status == "success"
@@ -543,11 +562,14 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                 
                 // Decode as MessagesResponse
                 let decodedResponse = try decoder.decode(GenerateKeysResponse.self, from: data)
+                
                 print("Generate keys response...")
                 print("Status: \(decodedResponse.status)")
                 print("Key Generation Error: ", decodedResponse.error ?? "No error")
-                print("Public Key prefix: \(decodedResponse.public_key.prefix(30))...")
-                print("Secret Key prefix: \(decodedResponse.secret_key.prefix(30))...")
+                print("Public key prefix: \(decodedResponse.public_key.prefix(30))...")
+                print("Public key count: \(decodedResponse.public_key.count)")
+                print("Secret key prefix: \(decodedResponse.secret_key.prefix(30))...")
+                print("Secret key count: \(decodedResponse.secret_key.count)")
                 
                 //set return values based on JSON response
                 returnValues["status"] = decodedResponse.status == "success"
