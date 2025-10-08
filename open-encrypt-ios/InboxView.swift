@@ -169,7 +169,7 @@ struct KeysView: View {
             
             Button("Save Public Key (remote)"){
                 if !publicKey.isEmpty{
-                    let params = ["public_key": publicKey, "action": "save_public_key"]
+                    let params = ["public_key": publicKey, "action": "save_public_key", "encryption_method": "ring_lwe"]
                     sendPOSTrequest(params: params){ returnValues in
                         // Update the state on the main thread
                         DispatchQueue.main.async {
@@ -393,9 +393,10 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
     let secretKey = params["secret_key"]
     let message = params["message"]
     let recipient = params["recipient"]
+    let encryptionMethod = params["encryption_method"]
     
     //initialize return values and API endpoint
-    let endpoint = "inbox_ios.php"
+    let endpoint = "api/inbox_ios.php"
     var returnValues : [String : Any] = ["status": false, "error": ""]
     
     // Declare username as an optional
@@ -435,6 +436,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
             json["secret_key"] = secretKey!
         case "save_public_key":
             json["public_key"] = publicKey!
+            json["encryption_method"] = encryptionMethod!
         case "send_message":
             json["message"] = message!
             json["recipient"] = recipient!
@@ -571,8 +573,7 @@ func sendPOSTrequest(params: [String: String], completion: @escaping ([String: A
                 
                 // Decode as MessagesResponse
                 let decodedResponse = try decoder.decode(SavePublicKeyResponse.self, from: data)
-                print("Save public key response:")
-                print("Status: \(decodedResponse.status)")
+                print("Save Public Key Status: \(decodedResponse.status)")
                 print("Save Public Key Error: ", decodedResponse.error ?? "No error")
                 
                 //set return values based on JSON response
